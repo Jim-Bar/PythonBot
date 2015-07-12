@@ -65,7 +65,7 @@ The object `bot` gives you access to five functions:
 
 If for instance I want to move forward, I write: `bot.move()`
 
-Description of the `scan` function:
+Description of the `scan()` function:
 
 1. `distance` is the relative distance from your bot to the center of the circle you're scanning.
 2. `radius` is the radius of this very circle.
@@ -79,13 +79,14 @@ This function returns a triplet which contains respectively:
 2. The number of enemy bots
 3. The number of enemy bullets
 
-Finally, your bot has access to its life remaining, its number of bullets available, and its number of kill (see the bot "dumb" for an example"). These are not functions, just attributes, so you can only read it, like this:
+Finally, your bot has access to its life remaining, its number of bullets available, and its number of kill (see the bot "dumb" for an example). These are not functions, just attributes, so you can only read it, like this:
 ```
 bot.health
 bot.bullets
 bot.kills
 ```
 And that's it ! Just build your AI from these functions, and don't forget that you can look at the bots provided in `BotLibrary` find inspiration ;)
+
 
 
 Here is the most basic bot you can build (does nothing):
