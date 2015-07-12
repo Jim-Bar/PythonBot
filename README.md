@@ -66,12 +66,15 @@ The object `bot` gives you access to five functions:
 If for instance I want to move forward, I write: `bot.move()`
 
 Description of the `scan` function:
+
 1. `distance` is the relative distance from your bot to the center of the circle you're scanning.
 2. `radius` is the radius of this very circle.
 3. `scanCircles` is a boolean that tells if walls (and wall disks) should be scanned.
 4. `scanBots` is the same but for the bots. Note that dead bots nor your bot are scanned.
 5. `scanBullets` is also the same, but for enemys' bullets.
+
 This function returns a triplet which contains respectively:
+
 1. The number of walls (if there is at least one wall, you probably want to rotate)
 2. The number of enemy bots
 3. The number of enemy bullets
