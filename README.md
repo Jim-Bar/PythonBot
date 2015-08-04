@@ -43,7 +43,7 @@ I never tried on Mac, but I assume it works the same way.
 
 ## Start the program
 
-Once the game is compiled, just run the script `pythonbot.py` in a terminal: `python pythonbot.py`. Admire how the bots seek and destroy each others (actually the default bots are not that smart...).
+Once the game is compiled, just run the script `pythonbot.py` in a terminal: `python pythonbot.py`. Pause/unpause the game by pressing the space bar. Admire how the bots seek and destroy each others (actually the default bots are not that smart...).
 
 ## Use different bots
 
