@@ -130,4 +130,4 @@ I am no longer releasing updates as I consider that the game reached a really go
 
 *Refer to 'LICENSE.txt' for the full notice.*
 
-The license apply for all source files (both C++ and Python), `README.md` and `LICENSE.txt`. The bots provided in `Bots/` and `BotLibrary/` are not part of the license. The Makefile, and Git-related file (`.gitignore`) are not part of the license.
+The license apply for all source files (both C++ and Python), `README.md` and `LICENSE.txt`. The bots provided in `Bots/` and `BotLibrary/` are not part of the license. The Makefile, and Git-related files (`.gitignore`) are not part of the license.
