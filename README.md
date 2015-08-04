@@ -47,11 +47,11 @@ Once the game is compiled, just run the script `pythonbot.py` in a terminal: `py
 
 ## Use different bots
 
-By default, 5 bots are participating into the fight, and you will see that they are not very intelligent. These bots are located in the subdirectory `Bots/`. You can find other examples in the `BotLibrary` folder. To use a bot, just copy it to the `Bots/` folder.
+By default, 5 bots are participating into the fight, and you will see that they are not very intelligent. These bots are located in the subdirectory `Bots/`. You can find other examples in the `BotLibrary/` folder. To use a bot, just copy it to the `Bots/` folder.
 
 # Write your own bot !
 
-Creating your bot is very simple. What you need is to create a python file named by the name of you bot (for example `myBot.py`).
+Creating your bot is very simple. What you need is to create a python file named by the name of your bot (for example `myBot.py`).
 Inside this file, create a function `main` that takes one argument `bot`:
 ```
 def main(bot):
@@ -85,7 +85,7 @@ bot.health
 bot.bullets
 bot.kills
 ```
-And that's it ! Just build your AI from these functions, and don't forget that you can look at the bots provided in `BotLibrary` find inspiration ;)
+And that's it ! Just build your AI from these functions, and don't forget that you can look at the bots provided in `BotLibrary` to find inspiration ;)
 
 
 
