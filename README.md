@@ -95,3 +95,39 @@ def main(bot):
   while True:
     bot.skip()
 ```
+
+# Improve PythonBot !
+
+Modifications to PythonBot are encouraged ! Feel free to fork, clone, download... and change it in the way you like :)
+
+The smartest brains out there will notice that other languages could easily replace Python (overlay of the Python functions, or rewritting of the Python module in another language, thanks to TCP).
+
+I used a GPL license, so PythonBot will stay open forever. You can still do whatever you want with it, as long as you provide the sources when releasing your version. More information on the GPL here: http://www.gnu.org/licenses/
+
+# Notes
+
+## Status of the development
+
+I am no longer releasing updates as I consider that the game reached a really good shape (compared to what I had in mind at the beginning). I would still love to receive feedback, so feel free to contact me if you liked the game. I am open to suggestions, but I will implement them only if I really (**really**) like your idea −so you can try−. However let me now if you encounter bugs, I will fix these !
+
+## License
+
+*PythonBot - A game by a developer for developers.*
+*Copyright (C) 2015 Jean-Marie BARAN*
+
+*This program is free software: you can redistribute it and/or modify*
+*it under the terms of the GNU General Public License as published by*
+*the Free Software Foundation, either version 3 of the License, or*
+*(at your option) any later version.*
+
+*This program is distributed in the hope that it will be useful,*
+*but WITHOUT ANY WARRANTY; without even the implied warranty of*
+*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the*
+*GNU General Public License for more details.*
+
+*You should have received a copy of the GNU General Public License*
+*along with this program. If not, see <http://www.gnu.org/licenses/>.*
+
+*Refer to 'LICENSE.txt' for the full notice.*
+
+The license apply for all source files (both C++ and Python), `README.md` and `LICENSE.txt`. The bots provided in `Bots/` and `BotLibrary/` are not part of the license. The Makefile, and Git-related file (`.gitignore`) are not part of the license.
