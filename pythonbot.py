@@ -18,7 +18,8 @@
 
 
 # Python version 2.7
-from os import path
+from os import path # To construct cross-compatible paths.
+from os import getcwd # To get the current working directory (cross-compatible paths again).
 from glob import glob
 from subprocess import Popen
 from importlib import import_module
@@ -29,13 +30,13 @@ import Bot
 # Load bots, launch the game and bots.
 def launch_game():
   # Detect bots.
-  botList = glob(path.join('Bots/', '*.py'))
-  botList = [bot[5:-3] for bot in botList if bot != 'Bots/__init__.py'] # Remove 'Bots/' and '.py' in the names, and __init__.py from the names.
+  botList = glob(path.join('Bots', '*.py'))
+  botList = [bot[5:-3] for bot in botList if bot != path.join('Bots', '__init__.py')] # Remove 'Bots/' and '.py' in the names, and __init__.py from the names.
   print 'Bots detected : {}'.format(botList)
   
   # Import the bots and check that they compile.
   botModuleList = []
-  open('Bots/__init__.py', 'w').close() # Create a __init__.py file in the Bots/ directory (to get import_module() function working).
+  open(path.join('Bots', '__init__.py'), 'w').close() # Create a __init__.py file in the Bots/ directory (to get import_module() function working).
   for bot in list(botList): # Iterate over a copy to be able to remove elements during the iteration process.
     try:
       botModule = import_module('Bots.' + bot) # Import the bot python file.
@@ -47,7 +48,7 @@ def launch_game():
 
   # Launch the game.
   port = get_free_port()
-  args = ['./pythonbot_core', '{}'.format(port), '{}'.format(len(botList))]
+  args = [path.join(getcwd(), 'pythonbot_core'), '{}'.format(port), '{}'.format(len(botList))]
   print 'Lauching {} {} {}'.format(args[0], args[1], args[2])
   Popen(args)
 
