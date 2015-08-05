@@ -29,6 +29,7 @@ I installed the game on Windows only once (a long time ago) and so do not rememb
 2. Install Python (Choose "Windows x86-64 MSI installer" in https://www.python.org/downloads/release/python-2710/)
 3. Download the game (clone the repository or download the zip archive)
 4. Compile it using your favorite IDE (make sure to link against `sfml-system`, `sfml-window`, `sfml-graphics`, and `sfml-network`)
+5. Move the executable in the root directory (the one where `pythonbot.py` is), and rename it to `pythonbot_core`
 
 ## Mac
 
@@ -37,7 +38,8 @@ I never tried on Mac, but I assume it works the same way.
 1. Install SFML (See http://www.sfml-dev.org/tutorials/2.3/start-osx-fr.php)
 2. Install Python (Choose "Mac OS X 64-bit/32-bit installer" in https://www.python.org/downloads/release/python-2710/)
 3. Download the game (clone the repository or download the zip archive)
-5. Compile it using Xcode (make sure to link against `sfml-system`, `sfml-window`, `sfml-graphics`, and `sfml-network`), or do it in the Unix way
+4. Compile it using Xcode (make sure to link against `sfml-system`, `sfml-window`, `sfml-graphics`, and `sfml-network`), or do it in the Unix way
+5. Move the executable in the root directory (the one where `pythonbot.py` is), and rename it to `pythonbot_core`
 
 # Test it
 
