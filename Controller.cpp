@@ -29,6 +29,7 @@ Controller::loop()
   bool gameFinished(false), paused(true);
   sf::Event event;
   
+  m_view.resize(); // Useful on Windows where the content is not properly sized. A recalculation fix it.
   while (!gameFinished)
   {
     // Deal with all events.
