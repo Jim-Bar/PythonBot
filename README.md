@@ -53,7 +53,7 @@ By default, 5 bots are participating into the fight, and you will see that they 
 
 # Write your own bot !
 
-Creating your bot is very simple. What you need is to create a python file named by the name of your bot (for example `myBot.py`).
+Creating your bot is very simple. What you need is to create a python file named after the name of your bot (for example `myBot.py`).
 Inside this file, create a function `main` that takes one argument `bot`:
 ```
 def main(bot):
@@ -62,7 +62,7 @@ The object `bot` gives you access to five functions:
 - `skip()`: do nothing
 - `move()`: advance your bot by one unit of distance
 - `rotate(angle)`: rotate your bot by `angle` degrees (not radians)
-- `fire()`: fire, but only if you have some bullets left. Note that this function returns the number of bullets that your bot currently dispose.
+- `fire()`: fire, but only if you have some bullets left.
 - `scan(distance, radius, scanCircles, scanBots, scanBullets)`: Err, this one is harder. Basically scan the map in a circle to see if there are enemy bots, bullets, or just walls.
 
 If for instance I want to move forward, I write: `bot.move()`
