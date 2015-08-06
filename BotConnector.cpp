@@ -123,8 +123,18 @@ BotConnector::answer_scan_request(unsigned int health, unsigned int numBulletsLe
 void
 BotConnector::send_data(unsigned int numCharacters)
 {
+  // Partial sends warning have been introduced in SFML 2.3. Up to 2.2, no need for using a third parameter for 'send()'.
+  #if SFML_VERSION_MAJOR == 2 && SFML_VERSION_MINOR <= 2
+  
+  if (m_tcpClient.send(m_data, numCharacters) != sf::Socket::Done)
+    std::cerr << "Error : Sending data to a bot failed" << std::endl;
+  
+  #else
+  
   size_t sent(0);
   if (m_tcpClient.send(m_data, numCharacters, sent) != sf::Socket::Done) // We use 'sent' to get rid of the SFML warning "Partial sends not handled properly".
     std::cerr << "Error : Sending data to a bot failed" << std::endl;
+  
+  #endif
 }
 
