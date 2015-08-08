@@ -27,23 +27,20 @@ void
 Controller::loop()
 {
   bool gameFinished(false), paused(true);
-  sf::Event event;
   
-  m_view.resize(); // Useful on Windows where the content is not properly sized. A recalculation fix it.
   while (!gameFinished)
   {
     // Deal with all events.
-    while (m_view.get_window().pollEvent(event))
+    switch (m_view.read_events())
     {
-      if (event.type == sf::Event::Closed)
-      {
-	m_view.get_window().close();
+      case View::REQUEST_QUIT: // Request to quit the game.
 	gameFinished = true;
-      }
-      else if (event.type == sf::Event::Resized)
-	m_view.resize();
-      else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+	break;
+      case View::REQUEST_PAUSE: // Request to pause/unpause the game.
 	paused = !paused;
+	break;
+      default: // No request made.
+	break;
     }
     
     // Draw the scene.

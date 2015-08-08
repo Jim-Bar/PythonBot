@@ -29,11 +29,18 @@
 class View
 {
 public:
+  enum EventRequest
+  {
+    REQUEST_NONE,
+    REQUEST_PAUSE,
+    REQUEST_QUIT
+  };
+  
   /* Constructor. */
   View(Model const& model, sf::Color edgesColor = sf::Color(128, 128, 128));
   
-  /* Getters. */
-  sf::RenderWindow& get_window();
+  /* Deal with events. */
+  EventRequest read_events();
   
   /* Set a list of objects to be drawn. */
   void draw(std::vector<Object*> const& objects);
@@ -46,9 +53,6 @@ public:
   
   /* Add a bot explosion to the scene. */
   void add_bot_explosion(sf::Vector2f const& position, float radius = 5.0f);
-  
-  /* Re-compute the positions and sizes of the views. */
-  void resize();
   
   /* Draw "Pause" on top of the game. */
   void draw_pause();
@@ -67,6 +71,9 @@ private:
   sf::Text m_numKills; // Number of kills for the bot.
   sf::Text m_pause;
   std::vector<Bot const*> m_bots; // Pointers to the bots (just to draw their info).
+  
+  /* Re-compute the positions and sizes of the views. */
+  void resize();
   
   /* Draw world's edges and explosions. */
   void draw_edges();

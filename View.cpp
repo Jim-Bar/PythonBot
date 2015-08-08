@@ -70,6 +70,7 @@ View::View(Model const& model, sf::Color edgesColor)
   m_window.setView(m_arena);
   m_pannel.setSize(((float) pannelWidth), (float) m_window.getSize().y);
   m_pannel.setCenter(m_pannel.getSize() / 2.0f);
+  resize(); // Initial resize useful on Windows where the content is not properly sized. A recalculation fix it.
   
   // Collect pointers to the bots.
   for (unsigned int i(0); i < model.get_bots().size(); i++)
@@ -99,10 +100,25 @@ View::View(Model const& model, sf::Color edgesColor)
   }
 }
 
-sf::RenderWindow&
-View::get_window()
+View::EventRequest
+View::read_events()
 {
-  return m_window;
+  sf::Event event;
+  
+  while (m_window.pollEvent(event))
+  {
+    if (event.type == sf::Event::Closed)
+    {
+      m_window.close();
+      return REQUEST_QUIT;
+    }
+    else if (event.type == sf::Event::Resized)
+      resize();
+    else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+      return REQUEST_PAUSE;
+  }
+  
+  return REQUEST_NONE;
 }
 
 void
