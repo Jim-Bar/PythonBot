@@ -105,7 +105,7 @@ Controller::update_bots()
   for (int i(0); i < (int) m_model.get_bots().size(); i++) // See bot death below for the cast.
   {
     // Get a direct pointer for convenience.
-    bot = (Bot*) m_model.get_bots()[i];    
+    bot = (Bot*) m_model.get_bots()[i];
     
     // Get and manage the request of each bot.
     BotConnector::Request const& request(bot->get_connector().get_request());

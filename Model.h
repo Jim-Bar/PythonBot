@@ -76,10 +76,8 @@ private:
   std::vector<Object*> m_scans;
   std::vector<Object*> m_bullets;
   
-  sf::TcpListener m_tcpListener;
-  
   /* Add a bot to the game. */
-  void add_bot();
+  void add_bot(sf::TcpListener& tcpListener);
   
   /* Check that a bot is within the world. */
   bool is_in_world(Bot const *bot, sf::Vector2f& hitPoint) const;

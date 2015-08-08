@@ -20,7 +20,7 @@
 
 #include "Scan.h"
 
-Scan::Scan(sf::Color color) : Circle(0, 0, 0, sf::Color::Transparent)
+Scan::Scan(sf::Color color) : Circle(0, 0, 0, sf::Color::Transparent), m_active(false)
 {
   m_SFMLShape.setOutlineThickness(-1.0f);
   m_SFMLShape.setOutlineColor(color);

@@ -48,14 +48,15 @@ Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsign
     m_circles.push_back(new Circle(x, y, radius));
   }
   
-  // Initialize listener for the incoming connections.
-  if (m_tcpListener.listen(port) != sf::Socket::Done)
+  // Initialize a listener for the incoming connections.
+  sf::TcpListener tcpListener;
+  if (tcpListener.listen(port) != sf::Socket::Done)
     std::cerr << "Error : Unable to bind the listener to port " << port << std::endl;
   
   // Add bots entities.
   std::cout << "Waiting for " << numBots << " bots..." << std::endl;
   for (unsigned int i(0); i < numBots; i++)
-    add_bot();
+    add_bot(tcpListener);
   
   // Sort the bots by name and give them their proper color.
   std::sort(m_bots.begin(), m_bots.end(), compare_bots);
@@ -65,7 +66,7 @@ Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsign
     ((Bot*) m_bots[i])->set_color(colors[i % 8]);
   
   // Close the listener (not needed anymore).
-  m_tcpListener.close();
+  tcpListener.close();
 }
 
 Model::~Model()
@@ -272,10 +273,10 @@ Model::distance(sf::Vector2f const& p1, sf::Vector2f const& p2) const
 }
 
 void
-Model::add_bot()
+Model::add_bot(sf::TcpListener& tcpListener)
 {
   sf::Vector2f hitPoint;
-  Bot *bot(new Bot(m_tcpListener)), *botBuffer(0); // 'botBuffer' not used, just to be able to call collides().
+  Bot *bot(new Bot(tcpListener)), *botBuffer(0); // 'botBuffer' not used, just to be able to call collides().
   do // Choose a free random position and orientation.
   {
     bot->set_position((float) random_value(m_width), (float) random_value(m_height));

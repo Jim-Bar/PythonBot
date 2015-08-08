@@ -18,11 +18,23 @@
  * Refer to 'LICENSE.txt' for the full notice.
  */
 
+/*
+ * Standalone or online version.
+ * 
+ * 'LocalView' is the regular version, in standalone mode. It will open a window on the system, and draw the game.
+ * 'RemoteView' is the online version. It will open a socket to a client, and send the graphical data to be drawn.
+ *
+ * To use 'LocalView', define LocalView. To use 'RemoteView', define RemoteView (and respective headers).
+ */
+
+#define VIEW RemoteView
+#define VIEW_HEADER "RemoteView.h"
+
 #include <cstdlib>
 #include <iostream>
 #
 #include "Model.h"      // M
-#include "View.h"       // V
+#include VIEW_HEADER    // V
 #include "Controller.h" // C
 
 int main(int argc, char *argv[])
@@ -43,7 +55,7 @@ int main(int argc, char *argv[])
   
   // Create game.
   Model model(port, numBots);
-  View view(model);
+  VIEW view(model);
   Controller controller(model, view);
   
   // Launch the game.

@@ -18,41 +18,44 @@
  * Refer to 'LICENSE.txt' for the full notice.
  */
 
-#ifndef VIEW__HEADER
-#define VIEW__HEADER
+#ifndef REMOTE_VIEW__HEADER
+#define REMOTE_VIEW__HEADER
 
-#include <vector>
-#include <SFML/Graphics.hpp>
-#
-#include "Model.h"
+#include "View.h"
 
-class View
+class RemoteView : public View
 {
 public:
-  enum EventRequest
-  {
-    REQUEST_NONE,
-    REQUEST_PAUSE,
-    REQUEST_QUIT
-  };
+  /* Constructor. */
+  RemoteView(Model const& model);
+  
+  /* Destructor. */
+  ~RemoteView();
   
   /* Deal with events. */
-  virtual EventRequest read_events() = 0;
+  EventRequest read_events();
   
   /* Set a list of objects to be drawn. */
-  virtual void draw(std::vector<Object*> const& objects) = 0;
+  void draw(std::vector<Object*> const& objects);
   
   /* Display the scene. */
-  virtual void render() = 0;
+  void render();
   
   /* Add a little explosion to the scene. */
-  virtual void add_explosion(sf::Vector2f const& position, float radius = 1.0f) = 0;
+  void add_explosion(sf::Vector2f const& position, float radius);
   
   /* Add a bot explosion to the scene. */
-  virtual void add_bot_explosion(sf::Vector2f const& position, float radius = 5.0f) = 0;
+  void add_bot_explosion(sf::Vector2f const& position, float radius);
   
   /* Draw "Pause" on top of the game. */
-  virtual void draw_pause() = 0;
+  void draw_pause();
+
+private:
+  bool m_clientDisconnected;
+  sf::TcpSocket m_tcpClient;
+  
+  /* Send the initial data (positions and sizes of objects). Refer to the method definition for the frame format. Success : true, fail : false. */
+  bool send_initial_state(Model const& model);
 };
 
 #endif
