@@ -79,7 +79,7 @@ bool read_arguments(int argc, char *argv[], int& portBots, int& numBots, int& po
 
 void create_game(int portBots, int numBots, int portRemoteView)
 {
-  if (portRemoteView == 0) // Local view.
+  if (portRemoteView == 0 && false) // Local view.
   {
     Model model(portBots, numBots);
     LocalView view(model);
