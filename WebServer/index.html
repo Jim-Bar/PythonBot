@@ -99,7 +99,6 @@
 	walls[i].y = gameSocket.rQshift16();
 	walls[i].radius = gameSocket.rQshift8();
       }
-      var index = 10 + (numWalls - 1) * 5 + 1; // Current position in the frame.
       
       var bots = [];
       for (i = 0; i < numBots; i++) {
@@ -110,7 +109,6 @@
 	bots[i].rotation = gameSocket.rQshift16();
 	var nameLength = gameSocket.rQshift8();
 	bots[i].name = gameSocket.rQshiftStr(nameLength);
-	index += 8 + nameLength; // Finally update the index.
       }
       console.log("Arena dimensions: " + width + "x" + height);
       console.log("Number of walls: " + numWalls);
