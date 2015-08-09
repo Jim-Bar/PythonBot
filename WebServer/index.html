@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+  <meta charset="utf-8">
+  <title>PythonBot Online</title>
+ 
+  <link rel="stylesheet" href="codemirror-5.5/lib/codemirror.css">
+ 
+  <script src="codemirror-5.5/lib/codemirror.js"></script>
+  <script src="codemirror-5.5/mode/python/python.js"></script>
+  <script src="websockify/include/websock.js"></script>
+  <script src="websockify/include/util.js"></script>
+  
+  <!--style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000000;
+    }
+  </style>
+  <script src="pixi.min.js"></script-->
+</head>
+ 
+<body>  
+  
+  <textarea id="editor" autofocus>def main(bot):&#13;&#10;  while True:&#13;&#10;    bot.skip()</textarea>
+  <button onclick="enter_arena();">Enter arena !</button>
+  <button onclick="connect_to_the_game();">Connect to the game</button>
+  <script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {tabSize: 2, lineNumbers: true, undoDepth: 1000});
+    
+    function enter_arena() {
+      open_websocket();
+    }
+
+    function open_websocket() {
+      var botCodeSocket = new Websock();
+      botCodeSocket.open("ws://127.0.0.1:5005");
+      
+      botCodeSocket.on("open", function () {
+	console.log("'botCodeSocket' Connected");
+	send_bot_code(botCodeSocket);
+      });
+      
+      botCodeSocket.on("message", function () {
+	console.log("'botCodeSocket' Received a message");
+      });
+      
+      botCodeSocket.on("close", function (event) {
+	botCodeSocket.close();
+	console.log("'botCodeSocket' Disconnected with event: " + event);
+      });
+      
+      botCodeSocket.on("error", function (error) {
+	console.error("'botCodeSocket' Error: " + error);
+      });
+    }
+    
+    function send_bot_code(botCodeSocket) {
+      var botCode = editor.getValue();
+      botCodeSocket.send_string(botCode);
+      console.log("'botCodeSocket' Sent:\n" + botCode);
+    }
+    
+    function connect_to_the_game() {
+      var gameSocket = new Websock();
+      gameSocket.open("ws://127.0.0.1:6005");
+      
+      gameSocket.on("open", function () {
+	console.log("'gameSocket' Connected");
+      });
+      
+      gameSocket.on("message", function () {
+	console.log("'gameSocket' Received a message");
+	receive_initial_state(gameSocket);
+      });
+      
+      gameSocket.on("close", function (event) {
+	gameSocket.close();
+	console.log("'gameSocket' Disconnected with event: " + event);
+      });
+      
+      gameSocket.on("error", function (error) {
+	console.error("'gameSocket' Error: " + error);
+      });
+    }
+    
+    function receive_initial_state(gameSocket) {
+      var width = gameSocket.rQshift16();
+      var height = gameSocket.rQshift16();
+      var numWalls = gameSocket.rQshift8();
+      var numBots = gameSocket.rQshift8();
+      var walls = [];
+      
+      for (i = 0; i < numWalls; i++) {
+        walls[i] = {};
+	walls[i].x = gameSocket.rQshift16();
+	walls[i].y = gameSocket.rQshift16();
+	walls[i].radius = gameSocket.rQshift8();
+      }
+      var index = 10 + (numWalls - 1) * 5 + 1; // Current position in the frame.
+      
+      var bots = [];
+      for (i = 0; i < numBots; i++) {
+	bots[i] = {};
+	bots[i].color = gameSocket.rQshift8();
+	bots[i].x = gameSocket.rQshift16();
+	bots[i].y = gameSocket.rQshift16();
+	bots[i].rotation = gameSocket.rQshift16();
+	var nameLength = gameSocket.rQshift8();
+	bots[i].name = gameSocket.rQshiftStr(nameLength);
+	index += 8 + nameLength; // Finally update the index.
+      }
+      console.log("Arena dimensions: " + width + "x" + height);
+      console.log("Number of walls: " + numWalls);
+      console.log("Number of bots: " + numBots);
+      for (i = 0; i < numWalls; i++) {
+	console.log("New wall (" + walls[i].x + ", " + walls[i].y + ", " + walls[i].radius + ")");
+      }
+      for (i = 0; i < numBots; i++) {
+	console.log("New bot (" + bots[i].x + ", " + bots[i].y + ", " + bots[i].rotation + "), color : " + bots[i].color + ", name : " + bots[i].name);
+      }
+    }
+  </script>
+  
+  <!--script>
+    // create an new instance of a pixi stage
+    var stage = new PIXI.Stage(0x66FF99);
+ 
+    // create a renderer instance.
+    var renderer = PIXI.autoDetectRenderer(400, 300);
+ 
+    // add the renderer view element to the DOM
+    document.body.appendChild(renderer.view);
+ 
+    requestAnimFrame( animate );
+ 
+    // create a texture from an image path
+    var texture = PIXI.Texture.fromImage("bunny.png");
+    // create a new Sprite using the texture
+    var bunny = new PIXI.Sprite(texture);
+ 
+    // center the sprites anchor point
+    bunny.anchor.x = 0.5;
+    bunny.anchor.y = 0.5;
+ 
+    // move the sprite t the center of the screen
+    bunny.position.x = 200;
+    bunny.position.y = 150;
+ 
+    stage.addChild(bunny);
+ 
+    function animate() {
+ 
+        requestAnimFrame( animate );
+ 
+        // just for fun, lets rotate mr rabbit a little
+        bunny.rotation += 0.1;
+ 
+        // render the stage   
+        renderer.render(stage);
+    }
+  </script-->
+ 
+</body>
+</html>
