@@ -24,42 +24,75 @@
  * 'LocalView' is the regular version, in standalone mode. It will open a window on the system, and draw the game.
  * 'RemoteView' is the online version. It will open a socket to a client, and send the graphical data to be drawn.
  *
- * To use 'LocalView', define LocalView. To use 'RemoteView', define RemoteView (and respective headers).
+ * If an extra port number is given, the online version will start. Otherwise the standalone version will be used.
  */
-
-#define VIEW RemoteView
-#define VIEW_HEADER "RemoteView.h"
 
 #include <cstdlib>
 #include <iostream>
 #
 #include "Model.h"      // M
-#include VIEW_HEADER    // V
+#include "LocalView.h"  // V
+#include "RemoteView.h" // V
 #include "Controller.h" // C
+
+bool read_arguments(int argc, char *argv[], int& portBots, int& numBots, int& portRemoteView);
+void create_game(int portBots, int numBots, int portRemoteView);
 
 int main(int argc, char *argv[])
 {
-  // Manage arguments.
-  if (argc != 3)
-  {
-    std::cerr << "Usage : " << argv[0] << " [port] [number of bots]" << std::endl;
+
+  int portBots(0), numBots(0), portRemoteView(0);
+  if (!read_arguments(argc, argv, portBots, numBots, portRemoteView))
     return EXIT_FAILURE;
-  }
-  int port(atoi(argv[1]));
-  int numBots(atoi(argv[2]));
-  if (port <= 0 || numBots <= 0)
-  {
-    std::cerr << "Invalid argument" << std::endl;
-    return EXIT_FAILURE;
-  }
   
-  // Create game.
-  Model model(port, numBots);
-  VIEW view(model);
-  Controller controller(model, view);
-  
-  // Launch the game.
-  controller.loop();
+  create_game(portBots, numBots, portRemoteView);
   
   return EXIT_SUCCESS;
+}
+
+bool read_arguments(int argc, char *argv[], int& portBots, int& numBots, int& portRemoteView)
+{
+  // Check the number of arguments.
+  if (argc != 3 && argc != 4)
+  {
+    std::cerr << "Usage : " << argv[0] << " PORT_BOTS NUMBER_OF_BOTS [PORT_REMOTE_VIEW]" << std::endl;
+    return false;
+  }
+  
+  // Read values.
+  portBots = atoi(argv[1]);
+  numBots = atoi(argv[2]);
+  if (argc == 4)
+    portRemoteView = atoi(argv[3]);
+  else
+    portRemoteView = 0;
+  
+  // Check the validity of the arguments. If 'portRemoteView' is 0, the standalone version will be used.
+  if (portBots <= 1024 || numBots <= 0 || portRemoteView < 0 || (portRemoteView > 0 && portRemoteView <= 1024))
+  {
+    std::cerr << "Invalid argument" << std::endl;
+    return false;
+  }
+  
+  return true;
+}
+
+void create_game(int portBots, int numBots, int portRemoteView)
+{
+  if (portRemoteView == 0) // Local view.
+  {
+    Model model(portBots, numBots);
+    LocalView view(model);
+    Controller controller(model, view);
+    
+    controller.loop();
+  }
+  else // Remote view.
+  {
+    Model model(portBots, numBots);
+    RemoteView view(model);
+    Controller controller(model, view);
+    
+    controller.loop();
+  }
 }
