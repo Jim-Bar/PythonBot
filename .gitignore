@@ -4,6 +4,9 @@
 # Compiled Python
 *.pyc
 
+# Init Python files
+__init__.py
+
 # Autosave files
 *.*~
 
