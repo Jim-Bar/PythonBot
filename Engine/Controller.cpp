@@ -26,7 +26,7 @@ Controller::Controller(Model& model, View& view) : m_model(model), m_view(view)
 void
 Controller::loop()
 {
-  bool gameFinished(false), paused(true);
+  bool gameFinished(false), paused(false);
   
   while (!gameFinished)
   {

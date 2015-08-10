@@ -29,9 +29,6 @@ public:
   /* Constructor. */
   RemoteView(Model const& model);
   
-  /* Destructor. */
-  ~RemoteView();
-  
   /* Deal with events. */
   EventRequest read_events();
   
@@ -51,11 +48,19 @@ public:
   void draw_pause();
 
 private:
+  Model const& m_model;
   bool m_clientDisconnected;
   sf::TcpSocket m_tcpClient;
   
+  // View's custom knowledge of starting explosions.
+  std::vector<sf::Vector2f> m_explosions;
+  std::vector<sf::Vector2f> m_botExplosions;
+  
   /* Send the initial data (positions and sizes of objects). Refer to the method definition for the frame format. Success : true, fail : false. */
-  bool send_initial_state(Model const& model);
+  bool send_initial_state();
+  
+  /* Send the current state : position of bots and bullets, and explosions. Refer to the method definition for the frame format. */
+  void send_current_state();
 };
 
 #endif
