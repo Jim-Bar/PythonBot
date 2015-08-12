@@ -73,6 +73,7 @@
 	if (initialStateReceived) {
 	  receive_current_state(gameSocket);
 	  update_bots(game);
+	  update_bullets(game);
 	}
 	else {
 	  receive_initial_state(gameSocket);
@@ -234,6 +235,7 @@
   
       create_bots(game, container);
       create_walls(game, container);
+      create_bullets(game, container);
   
       requestAnimFrame(animate);
       function animate() {
@@ -280,6 +282,15 @@
       }
     }
     
+    function update_bullets(game) {
+      game.bulletGraphics.clear();
+      for (i = 0; i < game.numBullets; i++) {
+	game.bulletGraphics.lineStyle(2, 0x000000);
+	game.bulletGraphics.drawCircle(game.bullets[i].x, game.bullets[i].y, 2.5);
+	game.bulletGraphics.endFill();
+      }
+    }
+    
     function create_walls(game, container) {
       for (i = 0; i < game.numWalls; i++) {
 	game.walls[i].graphics = new PIXI.Graphics();
@@ -289,6 +300,11 @@
 	game.walls[i].graphics.cacheAsBitmap = true;
 	container.addChild(game.walls[i].graphics);
       }
+    }
+    
+    function create_bullets(game, container) {
+      game.bulletGraphics = new PIXI.Graphics();
+      container.addChild(game.bulletGraphics);
     }
   </script>
  

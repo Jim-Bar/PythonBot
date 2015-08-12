@@ -72,7 +72,7 @@ RemoteView::draw(std::vector<Object*> const&) // As the parameter is unused, no 
 void
 RemoteView::render()
 {
-  sf::sleep(sf::milliseconds(50));
+  sf::sleep(sf::milliseconds(20));
   send_current_state();
 }
   
