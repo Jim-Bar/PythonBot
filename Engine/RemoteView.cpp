@@ -72,7 +72,7 @@ RemoteView::draw(std::vector<Object*> const&) // As the parameter is unused, no 
 void
 RemoteView::render()
 {
-  sf::sleep(sf::milliseconds(300));
+  sf::sleep(sf::milliseconds(50));
   send_current_state();
 }
   
@@ -247,11 +247,11 @@ RemoteView::send_current_state()
   // Fill the frame.
   unsigned int index(0); // Current position in the frame.
   unsigned int const maxFrameSize(2048);
-  unsigned char currentState[maxFrameSize] = {false ? (char) 1 << 7 : 0 /* The pause */}; // Static allocation is better than allocating/deallocating continuously.
+  unsigned char currentState[maxFrameSize] = {0/*false ? (char) 1 << 7 : 0*/ /* The pause */}; // Static allocation is better than allocating/deallocating continuously.
   for (unsigned int i(0); i < m_model.get_bots().size(); i++)
   {
     Bot *bot((Bot*) m_model.get_bots()[i]); // Get a direct pointer for convenience.
-    currentState[index] |= i << 1; // Color. Could be a '+=' as well, should not change anything (idem for the next fields). Do not remove '|', don't forget the pause !
+    currentState[index] |= i << 1; // Color. Do not remove '|', don't forget the pause ! Do not replace '|=' by '+=' as the type is char and not unsigned char !
     currentState[index++] |= (int) bot->get_SFML_shape().getRotation() >> 8; // High order first bit of the rotation.
     currentState[index++] = (int) bot->get_SFML_shape().getRotation(); // Truncated automatically.
     currentState[index] = (bot->is_alive() ? 1 : 0) << 7;
@@ -319,7 +319,7 @@ RemoteView::send_current_state()
     sf::Socket::Status status(m_tcpClient.send(currentState, frameSize));
     if (status != sf::Socket::Done)
     {
-      std::cerr << "Error : Sending initial data to the client failed" << std::endl;
+      std::cerr << "Error : Sending current state to the client failed" << std::endl;
       if (status == sf::Socket::Disconnected) // Exit the game only if the client disconnected. Otherwise, try continuing.
       {
 	m_tcpClient.disconnect();
