@@ -73,8 +73,8 @@ LocalView::LocalView(Model const& model, sf::Color edgesColor)
   resize(); // Initial resize useful on Windows where the content is not properly sized. A recalculation fix it.
   
   // Collect pointers to the bots.
-  for (unsigned int i(0); i < model.get_bots().size(); i++)
-    m_bots.push_back((Bot const*) model.get_bots()[i]);
+  for (unsigned int i(0); i < model.get_alive_bots().size(); i++)
+    m_bots.push_back((Bot const*) model.get_alive_bots()[i]);
   
   // Load font and initialize strings.
   const std::string fontName("arial.ttf");

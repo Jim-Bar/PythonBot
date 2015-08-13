@@ -59,11 +59,11 @@ Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsign
     add_bot(tcpListener);
   
   // Sort the bots by name and give them their proper color.
-  std::sort(m_bots.begin(), m_bots.end(), compare_bots);
+  std::sort(m_aliveBots.begin(), m_aliveBots.end(), compare_bots);
   sf::Color colors[] = {sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow,
                         sf::Color::Magenta, sf::Color::Cyan, sf::Color(255, 128, 0), sf::Color(128, 0, 255)}; // ... Orange, Purple.
   for (unsigned int i(0); i < numBots; i++)
-    ((Bot*) m_bots[i])->set_color(colors[i % 8]);
+    ((Bot*) m_aliveBots[i])->set_color(colors[i % 8]);
   
   // Close the listener (not needed anymore).
   tcpListener.close();
@@ -79,10 +79,10 @@ Model::~Model()
   }
   
   // Free bots.
-  while (!m_bots.empty())
+  while (!m_aliveBots.empty())
   {
-    delete m_bots.back();
-    m_bots.pop_back();
+    delete m_aliveBots.back();
+    m_aliveBots.pop_back();
   }
   while (!m_deadBots.empty())
   {
@@ -117,9 +117,9 @@ Model::get_circles() const
 }
 
 std::vector<Object*> const&
-Model::get_bots() const
+Model::get_alive_bots() const
 {
-  return m_bots;
+  return m_aliveBots;
 }
 
 std::vector<Object*> const&
@@ -140,6 +140,12 @@ Model::get_bullets() const
   return m_bullets;
 }
 
+std::vector<Object const*> const&
+Model::get_bots() const
+{
+  return m_bots;
+}
+
 bool
 Model::collides(Bot const *bot, Bot **botCollision, sf::Vector2f& hitPoint) const
 {
@@ -155,11 +161,11 @@ Model::collides(Bot const *bot, Bot **botCollision, sf::Vector2f& hitPoint) cons
   
   // Loop over all the bots.
   *botCollision = 0;
-  for (unsigned int i(0); i < m_bots.size(); i++)
-    if (bot != m_bots[i] && bot->distance(m_bots[i]) <= 4.0f / 3.0f * Bot::botLength)
-      if (collides(bot, ((Bot*) m_bots[i]), hitPoint))
+  for (unsigned int i(0); i < m_aliveBots.size(); i++)
+    if (bot != m_aliveBots[i] && bot->distance(m_aliveBots[i]) <= 4.0f / 3.0f * Bot::botLength)
+      if (collides(bot, ((Bot*) m_aliveBots[i]), hitPoint))
       {
-	*botCollision = (Bot*) m_bots[i];
+	*botCollision = (Bot*) m_aliveBots[i];
         return true;
       }
   
@@ -185,11 +191,11 @@ bool
 Model::collides(Bullet const *bullet, Bot **bot, sf::Vector2f& hitPoint) const
 {
   // Loop over all the bots.
-  for (unsigned int i(0); i < m_bots.size(); i++)
-    if (distance(bullet->get_position(), m_bots[i]->get_position()) <= bullet->get_radius() + 2.0f / 3.0f * Bot::botLength)
-      if (collides((Bot*) m_bots[i], bullet, hitPoint))
+  for (unsigned int i(0); i < m_aliveBots.size(); i++)
+    if (distance(bullet->get_position(), m_aliveBots[i]->get_position()) <= bullet->get_radius() + 2.0f / 3.0f * Bot::botLength)
+      if (collides((Bot*) m_aliveBots[i], bullet, hitPoint))
       {
-        *bot = (Bot*) m_bots[i];
+        *bot = (Bot*) m_aliveBots[i];
         return true;
       }
 
@@ -217,9 +223,9 @@ Model::inflict_damages(Bot *bot)
   if (!bot->is_alive()) // Move the bot to the dead list if it is dead.
   {
     m_deadBots.push_back(bot);
-    for (unsigned int i(0); i < m_bots.size(); i++)
-      if (bot == m_bots[i])
-        m_bots.erase(m_bots.begin() + i);
+    for (unsigned int i(0); i < m_aliveBots.size(); i++)
+      if (bot == m_aliveBots[i])
+        m_aliveBots.erase(m_aliveBots.begin() + i);
     for (unsigned int i(0); i < m_scans.size(); i++) // Remove the scan from the list.
       if (&bot->get_scan() == m_scans[i])
         m_scans.erase(m_scans.begin() + i);
@@ -248,8 +254,8 @@ Model::scan(Bot *bot, bool scanCircles, unsigned int& numCircles, bool scanBots,
   
   // Scan bots.
   if (scanBots)
-    for (unsigned int i(0); i < m_bots.size(); i++)
-      if (bot != m_bots[i] && collides((Bot const*) m_bots[i], &bot->get_scan(), hitPoint))
+    for (unsigned int i(0); i < m_aliveBots.size(); i++)
+      if (bot != m_aliveBots[i] && collides((Bot const*) m_aliveBots[i], &bot->get_scan(), hitPoint))
         numBots++;
   
   // Scan bullets.
@@ -283,7 +289,8 @@ Model::add_bot(sf::TcpListener& tcpListener)
     bot->rotate(random_value(360));
   } while (collides(bot, &botBuffer, hitPoint));  
   
-  m_bots.push_back(bot);
+  m_aliveBots.push_back(bot);
+  m_bots.push_back(bot); // And do not forget to fill the complete list of all bots as well.
 }
 
 bool

@@ -46,7 +46,7 @@ Controller::loop()
     // Draw the scene.
     m_view.draw(m_model.get_circles());
     m_view.draw(m_model.get_dead_bots());
-    m_view.draw(m_model.get_bots());
+    m_view.draw(m_model.get_alive_bots());
     m_view.draw(m_model.get_bullets());
     m_view.draw(m_model.get_scans());
     if (paused)
@@ -102,10 +102,10 @@ Controller::update_bots()
   // Loop over all the bots.
   Bot *bot(0);
   sf::Vector2f hitPoint;
-  for (int i(0); i < (int) m_model.get_bots().size(); i++) // See bot death below for the cast.
+  for (int i(0); i < (int) m_model.get_alive_bots().size(); i++) // See bot death below for the cast.
   {
     // Get a direct pointer for convenience.
-    bot = (Bot*) m_model.get_bots()[i];
+    bot = (Bot*) m_model.get_alive_bots()[i];
     
     // Get and manage the request of each bot.
     BotConnector::Request const& request(bot->get_connector().get_request());
