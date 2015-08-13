@@ -41,7 +41,7 @@ public:
   std::vector<Object*> const& get_dead_bots() const;
   std::vector<Object*> const& get_scans() const;
   std::vector<Object*> const& get_bullets() const;
-  std::vector<Object const*> const& get_bots() const;
+  std::vector<Object*> const& get_bots() const;
   
   /* Return 'true' if a bot collides with another object, bullets excepted ('bot' is the bot of collision is any). */
   bool collides(Bot const *bot, Bot **botCollision, sf::Vector2f& hitPoint) const;
@@ -76,7 +76,7 @@ private:
   std::vector<Object*> m_deadBots;
   std::vector<Object*> m_scans;
   std::vector<Object*> m_bullets;
-  std::vector<Object const*> m_bots; // All bots (alive + dead). Just to keep a way to have the bots ordered even when some die.
+  std::vector<Object*> m_bots; // All bots (alive + dead). Just to keep a way to have the bots ordered even when some die.
   
   /* Add a bot to the game. */
   void add_bot(sf::TcpListener& tcpListener);

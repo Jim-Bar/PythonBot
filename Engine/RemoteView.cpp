@@ -236,10 +236,8 @@ RemoteView::send_current_state()
   unsigned int frameSize(0); // In bytes.
   
   // Compute size for the bots.
-  for (unsigned int i(0); i < m_model.get_alive_bots().size(); i++)
-    frameSize += 4 + 2 + 2 + (((Bot*) m_model.get_alive_bots()[i])->get_scan().get_active() ? 2 + 2 + 2 : 0);
-  for (unsigned int i(0); i < m_model.get_dead_bots().size(); i++)
-    frameSize += 4 + 2 + 2; // The scan is sent only if the bot is alive.
+  for (unsigned int i(0); i < m_model.get_bots().size(); i++)
+    frameSize += 4 + 2 + 2 + (((Bot*) m_model.get_bots()[i])->get_scan().get_active() && ((Bot*) m_model.get_bots()[i])->is_alive() ? 2 + 2 + 2 : 0); // The scan is sent only if the bot is alive.
   
   // Compute size for the bullets and the explosions.
   frameSize += 1 + (2 + 2) * m_model.get_bullets().size();
@@ -250,9 +248,9 @@ RemoteView::send_current_state()
   unsigned int index(0); // Current position in the frame.
   unsigned int const maxFrameSize(2048);
   unsigned char currentState[maxFrameSize] = {0/*false ? (char) 1 << 7 : 0*/ /* The pause */}; // Static allocation is better than allocating/deallocating continuously.
-  for (unsigned int i(0); i < m_model.get_alive_bots().size() + m_model.get_dead_bots().size(); i++) // Loop over alive and dead bots all alike.
+  for (unsigned int i(0); i < m_model.get_bots().size(); i++) // Loop over alive and dead bots all alike.
   {
-    Bot *bot((Bot*) (i < m_model.get_alive_bots().size() ? m_model.get_alive_bots()[i] : m_model.get_dead_bots()[i - m_model.get_alive_bots().size()])); // Get a direct pointer for convenience, taking from the correct list.
+    Bot *bot((Bot*) m_model.get_bots()[i]); // Get a direct pointer for convenience, taking from the correct list.
     currentState[index] |= i << 1; // Color. Do not remove '|', don't forget the pause ! Do not replace '|=' by '+=' as the type is char and not unsigned char !
     currentState[index++] |= (int) bot->get_SFML_shape().getRotation() >> 8; // High order first bit of the rotation.
     currentState[index++] = (int) bot->get_SFML_shape().getRotation(); // Truncated automatically.

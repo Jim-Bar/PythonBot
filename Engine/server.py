@@ -5,7 +5,7 @@ from time import sleep
 
 # Server configuration.
 host = '127.0.0.1' # We are the host.
-port = 5006 # Port to listen to.
+port = 5009 # Port to listen to.
 bufferSize = 256 # Maximum data we will receive.
 
 # Create a new TCP socket.

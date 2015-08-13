@@ -67,6 +67,9 @@ Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsign
   
   // Close the listener (not needed anymore).
   tcpListener.close();
+  
+  // Finally, fill the vector of all bots.
+  m_bots = m_aliveBots;
 }
 
 Model::~Model()
@@ -140,7 +143,7 @@ Model::get_bullets() const
   return m_bullets;
 }
 
-std::vector<Object const*> const&
+std::vector<Object*> const&
 Model::get_bots() const
 {
   return m_bots;
@@ -290,7 +293,6 @@ Model::add_bot(sf::TcpListener& tcpListener)
   } while (collides(bot, &botBuffer, hitPoint));  
   
   m_aliveBots.push_back(bot);
-  m_bots.push_back(bot); // And do not forget to fill the complete list of all bots as well.
 }
 
 bool

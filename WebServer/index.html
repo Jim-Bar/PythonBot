@@ -273,8 +273,8 @@
 	game.bots[i].graphics.position.y = game.bots[i].y;
 	game.bots[i].graphics.rotation = degrees_to_radians(game.bots[i].rotation);
 	
+	game.bots[i].scan.graphics.clear(); // In any case clear the scan to avoid residual scan when a bot die.
 	if (game.bots[i].scanned) {
-	  game.bots[i].scan.graphics.clear();
 	  game.bots[i].scan.graphics.lineStyle(1, get_color(game.bots[i].color));
 	  game.bots[i].scan.graphics.drawCircle(game.bots[i].scan.x, game.bots[i].scan.y, game.bots[i].scan.radius);
 	  game.bots[i].scan.graphics.endFill();
