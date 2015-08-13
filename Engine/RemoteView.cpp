@@ -220,7 +220,7 @@ RemoteView::send_current_state()
    * - 'Color': color of the bot. Max is 63.
    * - 'Bot rotation': rotation in degrees. /!\ This field is 9 bits /!\. Max is 511.
    * - 'A': 1 if the bot is alive, 0 otherwise.
-   * - 'S': 1 if the bot has scanned at least once, 0 otherwise.
+   * - 'S': 1 if the scan is active (the bot has scanned at least once and is alive), 0 otherwise.
    * - 'Life': remaining life of the bot. Max is 15.
    * - 'Num kills': number of kills made by the bot. Max is 63.
    * - 'Bullets': number of remaining bullets of the bot. Max is 15.
@@ -229,7 +229,7 @@ RemoteView::send_current_state()
    * - 'Num EXPLOSIONS': are the big explosions. Max is 255.
    *
    * Notes:
-   * - The scan position/radius blocks are sent only if the bot has scanned at least once (bit 'S' to 1).
+   * - The scan position/radius blocks are sent only if the bot has scanned at least once (bit 'S' to 1), and if it is alive.
    * - Only the initial explosions are sent. The client must then manage their lifetime.
    */
   
@@ -238,6 +238,8 @@ RemoteView::send_current_state()
   // Compute size for the bots.
   for (unsigned int i(0); i < m_model.get_bots().size(); i++)
     frameSize += 4 + 2 + 2 + (((Bot*) m_model.get_bots()[i])->get_scan().get_active() ? 2 + 2 + 2 : 0);
+  for (unsigned int i(0); i < m_model.get_dead_bots().size(); i++)
+    frameSize += 4 + 2 + 2; // The scan is sent only if the bot is alive.
   
   // Compute size for the bullets and the explosions.
   frameSize += 1 + (2 + 2) * m_model.get_bullets().size();
@@ -248,14 +250,14 @@ RemoteView::send_current_state()
   unsigned int index(0); // Current position in the frame.
   unsigned int const maxFrameSize(2048);
   unsigned char currentState[maxFrameSize] = {0/*false ? (char) 1 << 7 : 0*/ /* The pause */}; // Static allocation is better than allocating/deallocating continuously.
-  for (unsigned int i(0); i < m_model.get_bots().size(); i++)
+  for (unsigned int i(0); i < m_model.get_bots().size() + m_model.get_dead_bots().size(); i++) // Loop over alive and dead bots all alike.
   {
-    Bot *bot((Bot*) m_model.get_bots()[i]); // Get a direct pointer for convenience.
+    Bot *bot((Bot*) (i < m_model.get_bots().size() ? m_model.get_bots()[i] : m_model.get_dead_bots()[i - m_model.get_bots().size()])); // Get a direct pointer for convenience, taking from the correct list.
     currentState[index] |= i << 1; // Color. Do not remove '|', don't forget the pause ! Do not replace '|=' by '+=' as the type is char and not unsigned char !
     currentState[index++] |= (int) bot->get_SFML_shape().getRotation() >> 8; // High order first bit of the rotation.
     currentState[index++] = (int) bot->get_SFML_shape().getRotation(); // Truncated automatically.
     currentState[index] = (bot->is_alive() ? 1 : 0) << 7;
-    currentState[index] |= (bot->get_scan().get_active() ? 1 : 0) << 6;
+    currentState[index] |= (bot->get_scan().get_active() && bot->is_alive() ? 1 : 0) << 6; // Mark also the scan as inactive if the bot is dead.
     currentState[index] |= bot->get_health() << 2;
     currentState[index++] |= bot->get_num_kills() >> 4;
     currentState[index] = bot->get_num_kills() << 4;
@@ -264,7 +266,7 @@ RemoteView::send_current_state()
     currentState[index++] = (int) bot->get_position().x;
     currentState[index++] = (int) bot->get_position().y >> 8;
     currentState[index++] = (int) bot->get_position().y;
-    if (bot->get_scan().get_active())
+    if (bot->get_scan().get_active() && bot->is_alive()) // The scan is sent only if the bot is alive.
     {
       currentState[index++] = (int) bot->get_scan().get_position().x >> 8;
       currentState[index++] = (int) bot->get_scan().get_position().x;

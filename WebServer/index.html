@@ -121,7 +121,7 @@
 	game.bots[botColor].y = gameSocket.rQshift16();
 	
 	// The scan, if applicable.
-	if (game.bots[botColor].scanned) {
+	if (game.bots[botColor].life > 0 && game.bots[botColor].scanned) {
 	  game.bots[botColor].scan.x = gameSocket.rQshift16();
 	  game.bots[botColor].scan.y = gameSocket.rQshift16();
 	  game.bots[botColor].scan.radius = gameSocket.rQshift16();
