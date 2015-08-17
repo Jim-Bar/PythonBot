@@ -250,12 +250,12 @@
       for (i = 0; i < game.numBots; i++) {
 	// Triangle.
 	game.bots[i].graphics = new PIXI.Graphics();
-	game.bots[i].graphics.beginFill(get_color(game.bots[i].color));
+	game.bots[i].graphics.beginFill(0xFFFFFF); // The color is set with the tint, as it is easier to change it latter this way.
 	game.bots[i].graphics.moveTo(0, - 2 * botLength / 3);
 	game.bots[i].graphics.lineTo(- botWidth / 2, botLength / 3);
 	game.bots[i].graphics.lineTo(botWidth / 2, botLength / 3);
 	game.bots[i].graphics.endFill();
-	game.bots[i].graphics.cacheAsBitmap = true; // Useful for antialiasing if the shape is not redraw (that's the case).
+	game.bots[i].graphics.tint = get_color(game.bots[i].color);
 	
 	// Scan.
 	game.bots[i].scan.graphics = new PIXI.Graphics(); // Nothing to draw until the bot scan.
@@ -272,6 +272,9 @@
 	game.bots[i].graphics.position.x = game.bots[i].x;
 	game.bots[i].graphics.position.y = game.bots[i].y;
 	game.bots[i].graphics.rotation = degrees_to_radians(game.bots[i].rotation);
+	if (game.bots[i].life == 0) { // Change the color to grey when the bot is dead.
+	  game.bots[i].graphics.tint = 0x808080;
+	}
 	
 	game.bots[i].scan.graphics.clear(); // In any case clear the scan to avoid residual scan when a bot die.
 	if (game.bots[i].scanned) {
