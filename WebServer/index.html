@@ -262,6 +262,7 @@
 	// Triangle.
 	game.bots[i].graphics = new PIXI.Graphics();
 	game.bots[i].graphics.beginFill(0xFFFFFF); // The color is set with the tint, as it is easier to change it latter this way.
+	game.bots[i].graphics.lineStyle(1, 0x808080);
 	game.bots[i].graphics.moveTo(0, - 2 * botLength / 3);
 	game.bots[i].graphics.lineTo(- botWidth / 2, botLength / 3);
 	game.bots[i].graphics.lineTo(botWidth / 2, botLength / 3);
