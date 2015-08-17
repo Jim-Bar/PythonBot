@@ -105,27 +105,27 @@
 	if (i == 0) { // The pause bit is merged into the block of the first bot.
 	  game.paused = (buffer >> 7) == 1;
 	}
-	var botColor = (buffer >> 1) & 0x3F; // 0X3F is 111111.
-	game.bots[botColor].rotation = (buffer & 1) << 8;
-	game.bots[botColor].rotation |= gameSocket.rQshift8();
+	var botID = (buffer >> 1) & 0x3F; // 0X3F is 111111.
+	game.bots[botID].rotation = (buffer & 1) << 8;
+	game.bots[botID].rotation |= gameSocket.rQshift8();
 	buffer = gameSocket.rQshift8();
-	game.bots[botColor].alive = (buffer >> 7) == 1;
-	game.bots[botColor].scanned = ((buffer >> 6) & 1) == 1;
-	game.bots[botColor].life = (buffer >> 2) & 0xF; // 0xF is 1111.
-	game.bots[botColor].kills = (buffer & 0x3) << 4; // 0x3 is 11.
+	game.bots[botID].alive = (buffer >> 7) == 1;
+	game.bots[botID].scanned = ((buffer >> 6) & 1) == 1;
+	game.bots[botID].life = (buffer >> 2) & 0xF; // 0xF is 1111.
+	game.bots[botID].kills = (buffer & 0x3) << 4; // 0x3 is 11.
 	buffer = gameSocket.rQshift8();
-	game.bots[botColor].kills |= buffer >> 4;
-	game.bots[botColor].bullets = buffer & 0xF; // 0xF is 1111.
+	game.bots[botID].kills |= buffer >> 4;
+	game.bots[botID].bullets = buffer & 0xF; // 0xF is 1111.
 	
 	// The position.
-	game.bots[botColor].x = gameSocket.rQshift16();
-	game.bots[botColor].y = gameSocket.rQshift16();
+	game.bots[botID].x = gameSocket.rQshift16();
+	game.bots[botID].y = gameSocket.rQshift16();
 	
 	// The scan, if applicable.
-	if (game.bots[botColor].life > 0 && game.bots[botColor].scanned) {
-	  game.bots[botColor].scan.x = gameSocket.rQshift16();
-	  game.bots[botColor].scan.y = gameSocket.rQshift16();
-	  game.bots[botColor].scan.radius = gameSocket.rQshift16();
+	if (game.bots[botID].life > 0 && game.bots[botID].scanned) {
+	  game.bots[botID].scan.x = gameSocket.rQshift16();
+	  game.bots[botID].scan.y = gameSocket.rQshift16();
+	  game.bots[botID].scan.radius = gameSocket.rQshift16();
 	}
       }
       
@@ -175,20 +175,20 @@
       
       game.bots = [];
       for (i = 0; i < game.numBots; i++) {
-	var botColor = gameSocket.rQshift8();
-	game.bots[botColor] = {};
-	game.bots[botColor].alive = true;
-	game.bots[botColor].scanned = false;
-	game.bots[botColor].life = 10;
-	game.bots[botColor].kills = 0;
-	game.bots[botColor].bullets = 10;
-	game.bots[botColor].scan = {};
-	game.bots[botColor].color = botColor;
-	game.bots[botColor].x = gameSocket.rQshift16();
-	game.bots[botColor].y = gameSocket.rQshift16();
-	game.bots[botColor].rotation = gameSocket.rQshift16();
+	var botID = gameSocket.rQshift8();
+	game.bots[botID] = {};
+	game.bots[botID].alive = true;
+	game.bots[botID].scanned = false;
+	game.bots[botID].life = 10;
+	game.bots[botID].kills = 0;
+	game.bots[botID].bullets = 10;
+	game.bots[botID].scan = {};
+	game.bots[botID].color = get_color(botID);
+	game.bots[botID].x = gameSocket.rQshift16();
+	game.bots[botID].y = gameSocket.rQshift16();
+	game.bots[botID].rotation = gameSocket.rQshift16();
 	var nameLength = gameSocket.rQshift8();
-	game.bots[botColor].name = gameSocket.rQshiftStr(nameLength);
+	game.bots[botID].name = gameSocket.rQshiftStr(nameLength);
       }
       
       game.numExplosions = 0;
@@ -267,7 +267,7 @@
 	game.bots[i].graphics.lineTo(- botWidth / 2, botLength / 3);
 	game.bots[i].graphics.lineTo(botWidth / 2, botLength / 3);
 	game.bots[i].graphics.endFill();
-	game.bots[i].graphics.tint = get_color(game.bots[i].color);
+	game.bots[i].graphics.tint = game.bots[i].color;
 	
 	// Scan.
 	game.bots[i].scan.graphics = new PIXI.Graphics(); // Nothing to draw until the bot scan.
@@ -290,7 +290,7 @@
 	
 	game.bots[i].scan.graphics.clear(); // In any case clear the scan to avoid residual scan when a bot die.
 	if (game.bots[i].scanned) {
-	  game.bots[i].scan.graphics.lineStyle(1, get_color(game.bots[i].color));
+	  game.bots[i].scan.graphics.lineStyle(1, game.bots[i].color);
 	  game.bots[i].scan.graphics.drawCircle(game.bots[i].scan.x, game.bots[i].scan.y, game.bots[i].scan.radius);
 	  game.bots[i].scan.graphics.endFill();
 	}

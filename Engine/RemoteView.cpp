@@ -168,7 +168,7 @@ RemoteView::send_initial_state()
   for (unsigned int i(0); i < m_model.get_alive_bots().size(); i++)
   {
     Bot *bot((Bot*) m_model.get_alive_bots()[i]); // Get a direct pointer for convenience.
-    initialState[index++] = i; // The color.
+    initialState[index++] = i; // The ID.
     initialState[index++] = (int) bot->get_position().x >> 8;
     initialState[index++] = (int) bot->get_position().x;
     initialState[index++] = (int) bot->get_position().y >> 8;
@@ -205,7 +205,7 @@ RemoteView::send_current_state()
    *  0               1               2               3               4               5               6               7
    *  0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   * |P|   Color   |  Bot rotation   |A|S| Life  | Num kills |Bullets|        Bot x position         |        Bot y position         |
+   * |P|  Bot ID   |  Bot rotation   |A|S| Life  | Num kills |Bullets|        Bot x position         |        Bot y position         |
    * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    * |        Scan x position        |        Scan y position        |          Scan radius          |Num of bullets |       Bullet x  <-- Repeat the entire block (beginning to scan y position OR bot y position, see below) for each bot.
    * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ <-- Exact position in frame become unknown (as bots vary in numbers).
@@ -217,7 +217,7 @@ RemoteView::send_current_state()
    *
    * Caption:
    * - 'P': 1 if paused, 0 otherwise. Note that this bit is actually repeated for each bot, but only the first one describe the pause status. All others are unused.
-   * - 'Color': color of the bot. Max is 63.
+   * - 'Bot ID': ID of the bot. Max is 63.
    * - 'Bot rotation': rotation in degrees. /!\ This field is 9 bits /!\. Max is 511.
    * - 'A': 1 if the bot is alive, 0 otherwise.
    * - 'S': 1 if the scan is active (the bot has scanned at least once and is alive), 0 otherwise.
