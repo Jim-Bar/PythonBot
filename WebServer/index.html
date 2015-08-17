@@ -74,6 +74,7 @@
 	  receive_current_state(gameSocket);
 	  update_bots(game);
 	  update_bullets(game);
+	  update_explosions(game);
 	}
 	else {
 	  receive_initial_state(gameSocket);
@@ -137,20 +138,24 @@
 	game.bullets[i].y = gameSocket.rQshift16();
       }
       
-      // The explosions (PARTIALLY IMPLEMENTED: SHOULD BE KEPT FROM A ITERATION TO ANOTHER).
-      game.explosions = [];
-      game.numExplosions = gameSocket.rQshift8();
-      for (i = 0; i < game.numExplosions; i++) {
-	game.explosions[i] = {};
-	game.explosions[i].x = gameSocket.rQshift16();
-	game.explosions[i].y = gameSocket.rQshift16();
+      // The explosions. The client is responsible for managing the lifetime of the explosions.
+      var numNewExplosions = gameSocket.rQshift8();
+      for (i = 0; i < numNewExplosions; i++) {
+	var newExplosion = {};
+	newExplosion.x = gameSocket.rQshift16();
+	newExplosion.y = gameSocket.rQshift16();
+	newExplosion.radius = 1;
+	game.explosions.push(newExplosion);
+	game.numExplosions++;
       }
-      game.botExplosions = [];
-      game.numBotExplosions = gameSocket.rQshift8();
-      for (i = 0; i < game.numBotExplosions; i++) {
-	game.botExplosions[i] = {};
-	game.botExplosions[i].x = gameSocket.rQshift16();
-	game.botExplosions[i].y = gameSocket.rQshift16();
+      var numNewBotExplosions = gameSocket.rQshift8();
+      for (i = 0; i < numNewBotExplosions; i++) {
+	var newBotExplosion = {};
+	newBotExplosion.x = gameSocket.rQshift16();
+	newBotExplosion.y = gameSocket.rQshift16();
+	newBotExplosion.radius = 5;
+	game.botExplosions.push(newBotExplosion);
+	game.numBotExplosions++;
       }
     }
     
@@ -185,6 +190,11 @@
 	var nameLength = gameSocket.rQshift8();
 	game.bots[botColor].name = gameSocket.rQshiftStr(nameLength);
       }
+      
+      game.numExplosions = 0;
+      game.numBotExplosions = 0;
+      game.explosions = [];
+      game.botExplosions = [];
       
       console.log("Initial game state:");
       console.log(game);
@@ -236,6 +246,7 @@
       create_bots(game, container);
       create_walls(game, container);
       create_bullets(game, container);
+      create_explosions(game, container);
   
       requestAnimFrame(animate);
       function animate() {
@@ -294,6 +305,36 @@
       }
     }
     
+    function update_explosions(game) {
+      game.explosionsGraphics.clear();
+      for (i = 0; i < game.numExplosions; i++) {
+	if (game.explosions[i].radius < 4) { // The radius goes from 1 to 4.
+	  game.explosionsGraphics.beginFill(0xFFFF00);
+	  game.explosionsGraphics.lineStyle(game.explosions[i].radius / 4, 0xFF0000);
+	  game.explosionsGraphics.drawCircle(game.explosions[i].x, game.explosions[i].y, game.explosions[i].radius);
+	  game.explosionsGraphics.endFill();
+	  game.explosions[i].radius += 0.4; // Increased the radius (= decrease lifetime).
+	}
+	else {
+	  game.explosions.splice(i, 1); // Remove the explosion from the array.
+	  game.numExplosions--;
+	}
+      }
+      for (i = 0; i < game.numBotExplosions; i++) {
+	if (game.botExplosions[i].radius < 8) { // The radius goes from 5 to 8.
+	  game.explosionsGraphics.beginFill(0xFFFF00);
+	  game.explosionsGraphics.lineStyle(game.botExplosions[i].radius / 4, 0xFF0000);
+	  game.explosionsGraphics.drawCircle(game.botExplosions[i].x, game.botExplosions[i].y, game.botExplosions[i].radius);
+	  game.explosionsGraphics.endFill();
+	  game.botExplosions[i].radius += 0.4; // Increased the radius (= decrease lifetime).
+	}
+	else {
+	  game.botExplosions.splice(i, 1); // Remove the bot explosion from the array.
+	  game.numBotExplosions--;
+	}
+      }
+    }
+    
     function create_walls(game, container) {
       for (i = 0; i < game.numWalls; i++) {
 	game.walls[i].graphics = new PIXI.Graphics();
@@ -308,6 +349,11 @@
     function create_bullets(game, container) {
       game.bulletGraphics = new PIXI.Graphics();
       container.addChild(game.bulletGraphics);
+    }
+    
+    function create_explosions(game, container) {
+      game.explosionsGraphics = new PIXI.Graphics();
+      container.addChild(game.explosionsGraphics);
     }
   </script>
  
