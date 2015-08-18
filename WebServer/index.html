@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <title>PythonBot Online</title>
  
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="codemirror-5.5/lib/codemirror.css">
  
   <script src="codemirror-5.5/lib/codemirror.js"></script>
@@ -20,6 +21,9 @@
   <button onclick="enter_arena();">Enter arena !</button>
   <button onclick="connect_to_the_game();">Connect to the game</button>
   <button onclick="exit_arena();">Exit arena</button>
+  <div id="BotCaption">
+    <!-- The bots' stats will go here (name, life, bullets, kills) -->
+  </div>
   <script>
     var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {tabSize: 2, lineNumbers: true, undoDepth: 1000});
     
@@ -75,6 +79,7 @@
 	  update_bots(game);
 	  update_bullets(game);
 	  update_explosions(game);
+	  update_bots_statistiques(game);
 	}
 	else {
 	  receive_initial_state(gameSocket);
@@ -243,11 +248,37 @@
       // add the renderer view element to the DOM
       document.body.appendChild(renderer.view);
   
+      // Create all the objects.
       create_bots(game, container);
       create_walls(game, container);
       create_bullets(game, container);
       create_explosions(game, container);
   
+      // Display bots' statistiques.
+      var botCaption = document.getElementById('BotCaption')
+      // Create the box containing the statistiques.
+      for (i = 0; i < game.numBots; i++) {
+	var innerHTML = '';
+	innerHTML += '<fieldset>\n';
+	innerHTML += '  <legend>' + game.bots[i].name + '</legend>\n';
+	innerHTML += '  <dl>\n';
+	innerHTML += '    <dt>Life</dt>\n<dd id=' + game.bots[i].name + '-life' + '>' + game.bots[i].life + '</dd>\n';
+	innerHTML += '    <dt>Bullets</dt>\n<dd id=' + game.bots[i].name + '-bullets' + '>' + game.bots[i].bullets + '</dd>\n';
+	innerHTML += '    <dt>Kills</dt>\n<dd id=' + game.bots[i].name + '-kills' + '>' + game.bots[i].kills + '</dd>\n';
+	innerHTML += '  </dl>\n';
+	innerHTML += '</fieldset>\n';
+	botCaption.innerHTML += innerHTML;
+      }
+      
+      // Now that the DOM has been changed, get references to the DOM elements which will change. Note that this cannot be done in the same 'for'.
+      for (i = 0; i < game.numBots; i++) {
+	game.bots[i].caption = {};
+	game.bots[i].caption.life = document.getElementById(game.bots[i].name + '-life');
+	game.bots[i].caption.bullets = document.getElementById(game.bots[i].name + '-bullets');
+	game.bots[i].caption.kills = document.getElementById(game.bots[i].name + '-kills');
+      }
+  
+      // Start animation.
       requestAnimFrame(animate);
       function animate() {
 	  requestAnimFrame(animate);
@@ -280,7 +311,8 @@
     }
     
     function update_bots(game) {
-      for (i = 0; i < game.numBots; i++) {	
+      for (i = 0; i < game.numBots; i++) {
+	// Draw the shape.
 	game.bots[i].graphics.position.x = game.bots[i].x;
 	game.bots[i].graphics.position.y = game.bots[i].y;
 	game.bots[i].graphics.rotation = degrees_to_radians(game.bots[i].rotation);
@@ -288,12 +320,22 @@
 	  game.bots[i].graphics.tint = 0xC0C0C0;
 	}
 	
+	// Draw the scan.
 	game.bots[i].scan.graphics.clear(); // In any case clear the scan to avoid residual scan when a bot die.
 	if (game.bots[i].scanned) {
 	  game.bots[i].scan.graphics.lineStyle(1, game.bots[i].color);
 	  game.bots[i].scan.graphics.drawCircle(game.bots[i].scan.x, game.bots[i].scan.y, game.bots[i].scan.radius);
 	  game.bots[i].scan.graphics.endFill();
 	}
+      }
+    }
+    
+    // This function is dissociated from update_bots() because update_bots() is called when the captions are not yet defined (when receiving the initial state).
+    function update_bots_statistiques(game) {
+      for (i = 0; i < game.numBots; i++) {
+	game.bots[i].caption.life.innerHTML = game.bots[i].life;
+	game.bots[i].caption.bullets.innerHTML = game.bots[i].bullets;
+	game.bots[i].caption.kills.innerHTML = game.bots[i].kills;
       }
     }
     
