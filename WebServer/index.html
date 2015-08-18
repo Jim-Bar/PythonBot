@@ -100,6 +100,50 @@
     function exit_arena() {
       gameSocket.close();
     }
+    
+    function receive_initial_state(gameSocket) {
+      game.width = gameSocket.rQshift16();
+      game.height = gameSocket.rQshift16();
+      game.numWalls = gameSocket.rQshift8();
+      game.numBots = gameSocket.rQshift8();
+      
+      game.walls = [];
+      for (i = 0; i < game.numWalls; i++) {
+        game.walls[i] = {};
+	game.walls[i].x = gameSocket.rQshift16();
+	game.walls[i].y = gameSocket.rQshift16();
+	game.walls[i].radius = gameSocket.rQshift8();
+      }
+      
+      game.bots = [];
+      for (i = 0; i < game.numBots; i++) {
+	var botID = gameSocket.rQshift8();
+	game.bots[botID] = {};
+	game.bots[botID].markedAsDead = false; // Set to 'true' when the bot is dead (after having changed color in Pixi and CSS). See 'update_bots()'.
+	game.bots[botID].alive = true;
+	game.bots[botID].scanned = false;
+	game.bots[botID].life = 10;
+	game.bots[botID].kills = 0;
+	game.bots[botID].bullets = 10;
+	game.bots[botID].scan = {};
+	game.bots[botID].color = get_color(botID);
+	game.bots[botID].x = gameSocket.rQshift16();
+	game.bots[botID].y = gameSocket.rQshift16();
+	game.bots[botID].rotation = gameSocket.rQshift16();
+	var nameLength = gameSocket.rQshift8();
+	game.bots[botID].name = gameSocket.rQshiftStr(nameLength);
+      }
+      
+      game.numExplosions = 0;
+      game.numBotExplosions = 0;
+      game.explosions = [];
+      game.botExplosions = [];
+      
+      console.log("Initial game state:");
+      console.log(game);
+      
+      create_view(game);
+    }
 
     function receive_current_state(gameSocket) {    
       // The bots.
@@ -163,49 +207,6 @@
 	game.numBotExplosions++;
       }
     }
-    
-    function receive_initial_state(gameSocket) {
-      game.width = gameSocket.rQshift16();
-      game.height = gameSocket.rQshift16();
-      game.numWalls = gameSocket.rQshift8();
-      game.numBots = gameSocket.rQshift8();
-      
-      game.walls = [];
-      for (i = 0; i < game.numWalls; i++) {
-        game.walls[i] = {};
-	game.walls[i].x = gameSocket.rQshift16();
-	game.walls[i].y = gameSocket.rQshift16();
-	game.walls[i].radius = gameSocket.rQshift8();
-      }
-      
-      game.bots = [];
-      for (i = 0; i < game.numBots; i++) {
-	var botID = gameSocket.rQshift8();
-	game.bots[botID] = {};
-	game.bots[botID].alive = true;
-	game.bots[botID].scanned = false;
-	game.bots[botID].life = 10;
-	game.bots[botID].kills = 0;
-	game.bots[botID].bullets = 10;
-	game.bots[botID].scan = {};
-	game.bots[botID].color = get_color(botID);
-	game.bots[botID].x = gameSocket.rQshift16();
-	game.bots[botID].y = gameSocket.rQshift16();
-	game.bots[botID].rotation = gameSocket.rQshift16();
-	var nameLength = gameSocket.rQshift8();
-	game.bots[botID].name = gameSocket.rQshiftStr(nameLength);
-      }
-      
-      game.numExplosions = 0;
-      game.numBotExplosions = 0;
-      game.explosions = [];
-      game.botExplosions = [];
-      
-      console.log("Initial game state:");
-      console.log(game);
-      
-      create_view(game);
-    }
   </script>
   
   <script>
@@ -229,7 +230,7 @@
 	  return 0x8000FF;
 	default:
 	  console.error("Unknown color: " + colorId);
-	  return 0x808080; // Grey.
+	  return 0xC0C0C0; // Light grey.
       }
     }
   
@@ -259,23 +260,23 @@
       // Create the box containing the statistiques.
       for (i = 0; i < game.numBots; i++) {
 	var innerHTML = '';
-	innerHTML += '<fieldset>\n';
+	innerHTML += '<fieldset id="Bot' + i + '">\n';
 	innerHTML += '  <legend>' + game.bots[i].name + '</legend>\n';
 	innerHTML += '  <dl>\n';
-	innerHTML += '    <dt>Life</dt>\n<dd id=' + game.bots[i].name + '-life' + '>' + game.bots[i].life + '</dd>\n';
-	innerHTML += '    <dt>Bullets</dt>\n<dd id=' + game.bots[i].name + '-bullets' + '>' + game.bots[i].bullets + '</dd>\n';
-	innerHTML += '    <dt>Kills</dt>\n<dd id=' + game.bots[i].name + '-kills' + '>' + game.bots[i].kills + '</dd>\n';
+	innerHTML += '    <dt>Life</dt>\n<dd id="' + 'Bot' + i + '-life"' + '>' + game.bots[i].life + '</dd><br />\n';
+	innerHTML += '    <dt>Bullets</dt>\n<dd id="' + 'Bot' + i + '-bullets"' + '>' + game.bots[i].bullets + '</dd><br />\n';
+	innerHTML += '    <dt>Kills</dt>\n<dd id="' + 'Bot' + i + '-kills"' + '>' + game.bots[i].kills + '</dd>\n';
 	innerHTML += '  </dl>\n';
 	innerHTML += '</fieldset>\n';
 	botCaption.innerHTML += innerHTML;
       }
       
-      // Now that the DOM has been changed, get references to the DOM elements which will change. Note that this cannot be done in the same 'for'.
+      // Now that the DOM has been changed, get references to the DOM elements which will change. Note that this cannot be done in the same 'for' loop.
       for (i = 0; i < game.numBots; i++) {
 	game.bots[i].caption = {};
-	game.bots[i].caption.life = document.getElementById(game.bots[i].name + '-life');
-	game.bots[i].caption.bullets = document.getElementById(game.bots[i].name + '-bullets');
-	game.bots[i].caption.kills = document.getElementById(game.bots[i].name + '-kills');
+	game.bots[i].caption.life = document.getElementById('Bot' + i + '-life');
+	game.bots[i].caption.bullets = document.getElementById('Bot' + i + '-bullets');
+	game.bots[i].caption.kills = document.getElementById('Bot' + i + '-kills');
       }
   
       // Start animation.
@@ -286,38 +287,16 @@
       }
     }
     
-    function create_bots(game, container) {
-      var botLength = 20;
-      var botWidth = 2 * botLength / 3.5;
-      for (i = 0; i < game.numBots; i++) {
-	// Triangle.
-	game.bots[i].graphics = new PIXI.Graphics();
-	game.bots[i].graphics.beginFill(0xFFFFFF); // The color is set with the tint, as it is easier to change it latter this way.
-	game.bots[i].graphics.lineStyle(1, 0xC0C0C0);
-	game.bots[i].graphics.moveTo(0, - 2 * botLength / 3);
-	game.bots[i].graphics.lineTo(- botWidth / 2, botLength / 3);
-	game.bots[i].graphics.lineTo(botWidth / 2, botLength / 3);
-	game.bots[i].graphics.endFill();
-	game.bots[i].graphics.tint = game.bots[i].color;
-	
-	// Scan.
-	game.bots[i].scan.graphics = new PIXI.Graphics(); // Nothing to draw until the bot scan.
-	
-	container.addChild(game.bots[i].graphics);
-	container.addChild(game.bots[i].scan.graphics);
-      }
-      
-      update_bots(game);
-    }
-    
     function update_bots(game) {
       for (i = 0; i < game.numBots; i++) {
 	// Draw the shape.
 	game.bots[i].graphics.position.x = game.bots[i].x;
 	game.bots[i].graphics.position.y = game.bots[i].y;
 	game.bots[i].graphics.rotation = degrees_to_radians(game.bots[i].rotation);
-	if (game.bots[i].life == 0) { // Change the color to grey when the bot is dead.
-	  game.bots[i].graphics.tint = 0xC0C0C0;
+	if (!game.bots[i].markedAsDead && game.bots[i].life == 0) { // Change the color to light grey when the bot is dead...
+	  game.bots[i].graphics.tint = 0xC0C0C0; // ...in Pixi...
+	  document.getElementById('Bot' + i).id = 'BotDead'; // ...and in CSS.
+	  game.bots[i].markedAsDead = true; // Mark the bot as dead so we do not try to change its color properties again.
 	}
 	
 	// Draw the scan.
@@ -387,6 +366,30 @@
 	game.walls[i].graphics.cacheAsBitmap = true;
 	container.addChild(game.walls[i].graphics);
       }
+    }
+    
+    function create_bots(game, container) {
+      var botLength = 20;
+      var botWidth = 2 * botLength / 3.5;
+      for (i = 0; i < game.numBots; i++) {
+	// Triangle.
+	game.bots[i].graphics = new PIXI.Graphics();
+	game.bots[i].graphics.beginFill(0xFFFFFF); // The color is set with the tint, as it is easier to change it latter this way.
+	game.bots[i].graphics.lineStyle(1, 0xC0C0C0);
+	game.bots[i].graphics.moveTo(0, - 2 * botLength / 3);
+	game.bots[i].graphics.lineTo(- botWidth / 2, botLength / 3);
+	game.bots[i].graphics.lineTo(botWidth / 2, botLength / 3);
+	game.bots[i].graphics.endFill();
+	game.bots[i].graphics.tint = game.bots[i].color;
+	
+	// Scan.
+	game.bots[i].scan.graphics = new PIXI.Graphics(); // Nothing to draw until the bot scan.
+	
+	container.addChild(game.bots[i].graphics);
+	container.addChild(game.bots[i].scan.graphics);
+      }
+      
+      update_bots(game);
     }
     
     function create_bullets(game, container) {
