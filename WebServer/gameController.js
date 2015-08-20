@@ -5,6 +5,14 @@ var gameRunning = false;
 
 function load_game() {
   editor = CodeMirror.fromTextArea(document.getElementById("editor"), {tabSize: 2, lineNumbers: true, undoDepth: 1000});
+  
+  /* Automatically close the websocket when the page is refreshed, or the browser closed. */
+  window.onbeforeunload = function() {
+    if (gameSocket != undefined && gameSocket.close != undefined) {
+      gameSocket.onclose = function () {}; // Disable 'onclose' handler first.
+      gameSocket.close(); // No need to perform check, as a double 'close()' does not raise an error (does nothing).
+    }
+  };
 }
 
 function enter_arena() {
@@ -12,32 +20,32 @@ function enter_arena() {
 }
 
 function open_websocket() {
-  var botCodeSocket = new Websock();
-  botCodeSocket.open("ws://127.0.0.1:5005");
+  var controlSocket = new Websock();
+  controlSocket.open("ws://127.0.0.1:5005");
   
-  botCodeSocket.on("open", function () {
-    console.log("'botCodeSocket' Connected");
-    send_bot_code(botCodeSocket);
+  controlSocket.on("open", function () {
+    console.log("'controlSocket' Connected");
+    send_bot_code(controlSocket);
   });
   
-  botCodeSocket.on("message", function () {
-    console.log("'botCodeSocket' Received a message");
+  controlSocket.on("message", function () {
+    console.log("'controlSocket' Received a message");
   });
   
-  botCodeSocket.on("close", function (event) {
-    botCodeSocket.close();
-    console.log("'botCodeSocket' Disconnected with event: " + event);
+  controlSocket.on("close", function (event) {
+    controlSocket.close();
+    console.log("'controlSocket' Disconnected with event: " + event);
   });
   
-  botCodeSocket.on("error", function (error) {
-    console.error("'botCodeSocket' Error: " + error);
+  controlSocket.on("error", function (error) {
+    console.error("'controlSocket' Error: " + error);
   });
 }
 
-function send_bot_code(botCodeSocket) {
+function send_bot_code(controlSocket) {
   var botCode = editor.getValue();
-  botCodeSocket.send_string(botCode);
-  console.log("'botCodeSocket' Sent:\n" + botCode);
+  controlSocket.send_string(botCode);
+  console.log("'controlSocket' Sent:\n" + botCode);
 }
 
 function connect_to_the_game() {
@@ -65,10 +73,13 @@ function connect_to_the_game() {
   });
   
   gameSocket.on("close", function (event) {
-    gameSocket.close();
+    // Stop the rendering loop.
+    gameRunning = false;
+    
+    // Clean objects for later reuse.
     gameSocket = {};
     game = {};
-    gameRunning = false;
+    
     console.log("'gameSocket' Disconnected with event: " + event);
   });
   
