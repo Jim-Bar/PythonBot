@@ -68,8 +68,8 @@ fieldset#BotDead legend, fieldset#BotDead dt, fieldset#BotDead dd {
   text-shadow: 1px 1px none;
 }
 
-/* Close the arena with a line. */
+/* Close the arena with a line. The attribute 'width' is gained when the game start. Before that, there is no outline visible. */
 
-canvas {
+canvas[width] {
   border: 1px solid #808080;
 }

@@ -213,15 +213,12 @@ function degrees_to_radians(degrees) {
 };
 
 function create_view() {
-  // create an new instance of a pixi container.
+  // Create an new instance of a pixi container.
   var container = new PIXI.Container();
 
-  // create a renderer instance.
-  var renderer = PIXI.autoDetectRenderer(game.width, game.height, {antialias: true});
+  // Create a renderer instance, and position it into a canvas.
+  var renderer = PIXI.autoDetectRenderer(game.width, game.height, {view: document.getElementById("GameCanvas"), antialias: true}); // Antialiasing is applicable for Chrome only.
   renderer.backgroundColor = 0xFFFFFF;
-
-  // add the renderer view element to the DOM
-  document.body.appendChild(renderer.view);
 
   // Create all the objects.
   create_bots(container);
