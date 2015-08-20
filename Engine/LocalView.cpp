@@ -27,7 +27,7 @@
 float const LocalView::edgesWidth;
 float const LocalView::defaultMargin;
 
-LocalView::LocalView(Model const& model, sf::Color edgesColor)
+LocalView::LocalView(Model const& model, sf::Color edgesColor) : m_model(model)
 {
   // Retrieve a valid video mode.
   unsigned int const pannelWidth(400); // Bots info display zone.
@@ -71,10 +71,6 @@ LocalView::LocalView(Model const& model, sf::Color edgesColor)
   m_pannel.setSize(((float) pannelWidth), (float) m_window.getSize().y);
   m_pannel.setCenter(m_pannel.getSize() / 2.0f);
   resize(); // Initial resize useful on Windows where the content is not properly sized. A recalculation fix it.
-  
-  // Collect pointers to the bots.
-  for (unsigned int i(0); i < model.get_alive_bots().size(); i++)
-    m_bots.push_back((Bot const*) model.get_alive_bots()[i]);
   
   // Load font and initialize strings.
   const std::string fontName("arial.ttf");
@@ -245,35 +241,37 @@ LocalView::draw_bots_info()
   float const gap((m_pannel.getSize().y - ((float) numBoxVertically) * box.getSize().y) / (((float) numBoxVertically) - 1.0f));
   
   float posX(0.0f);
-  for (unsigned int i(0); i < m_bots.size(); i++)
+  for (unsigned int i(0); i < m_model.get_bots().size(); i++)
   {
+    Bot *bot((Bot*) m_model.get_bots()[i]); // Get a direct pointer for convenience.
+    
     // Fill the second column if the first one is full.
     if (i == numBoxVertically)
       posX = box.getSize().x + defaultMargin / 2.0f;
     
     // Draw box.
     box.setPosition(posX, (float) (i % numBoxVertically) * (box.getSize().y + gap));
-    box.setOutlineColor(m_bots[i]->get_SFML_shape().getOutlineColor());
+    box.setOutlineColor(bot->get_SFML_shape().getOutlineColor());
     m_window.draw(box);
     
     // Draw name.
-    m_botName.setString(m_bots[i]->get_name());
+    m_botName.setString(bot->get_name());
     m_botName.setColor(box.getOutlineColor());
     m_botName.setPosition(box.getPosition() + sf::Vector2f(5.0f, 2.0f));
     m_window.draw(m_botName);
     
     // Draw number of kills.
     std::ostringstream numKills;
-    numKills << m_bots[i]->get_num_kills();
+    numKills << bot->get_num_kills();
     m_numKills.setString(numKills.str());
-    m_numKills.setCharacterSize(15 + m_bots[i]->get_num_kills() / 2.0f); // Increase the size of the number of kills if it is high (can break the design if it is too high).
+    m_numKills.setCharacterSize(15 + bot->get_num_kills() / 2.0f); // Increase the size of the number of kills if it is high (can break the design if it is too high).
     m_numKills.setColor(box.getOutlineColor());
     m_numKills.setPosition(sf::Vector2f(box.getPosition().x + box.getSize().x - m_numKills.getLocalBounds().width - 5.0f, m_botName.getPosition().y));
     m_window.draw(m_numKills);
     
     // Draw health.
     healthBox.setFillColor(box.getOutlineColor());
-    for (unsigned int j(0); j < m_bots[i]->get_health(); j++)
+    for (unsigned int j(0); j < bot->get_health(); j++)
     {
       healthBox.setPosition(box.getPosition().x + ((float) j) * (healthBoxWidth + 1.0f) + 1.0f,
                             box.getPosition().y + box.getSize().y - 1.0f - healthBoxHeight);
@@ -282,7 +280,7 @@ LocalView::draw_bots_info()
     
     // Draw bullets.
     bulletBox.setFillColor(box.getOutlineColor());
-    for (unsigned int j(0); j < m_bots[i]->get_bullets_left(); j++)
+    for (unsigned int j(0); j < bot->get_bullets_left(); j++)
     {
       bulletBox.setPosition(box.getPosition().x + ((float) j) * (bulletBox.getSize().x + 4.0f) + 4.0f,
                             box.getPosition().y + box.getSize().y - healthBoxHeight - bulletBox.getSize().y - 3.0f);

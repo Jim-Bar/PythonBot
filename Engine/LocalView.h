@@ -51,6 +51,8 @@ private:
   static float const edgesWidth = 10.0f;
   static float const defaultMargin = 50.0f; // Default margin between the arena and the pannel.
   
+  Model const& m_model; // To have access to 'get_bots()' in order to print their state.
+  
   sf::RenderWindow m_window;
   sf::View m_arena;
   sf::View m_pannel;
@@ -60,7 +62,6 @@ private:
   sf::Text m_botName;
   sf::Text m_numKills; // Number of kills for the bot.
   sf::Text m_pause;
-  std::vector<Bot const*> m_bots; // Pointers to the bots (just to draw their info).
   
   /* Re-compute the positions and sizes of the views. */
   void resize();
