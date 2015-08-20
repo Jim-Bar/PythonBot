@@ -1,6 +1,10 @@
-var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {tabSize: 2, lineNumbers: true, undoDepth: 1000});
-
+var editor = {};
 var game = {};
+var gameSocket = undefined;
+
+function load_game() {
+  editor = CodeMirror.fromTextArea(document.getElementById("editor"), {tabSize: 2, lineNumbers: true, undoDepth: 1000});
+}
 
 function enter_arena() {
   open_websocket();
@@ -35,7 +39,6 @@ function send_bot_code(botCodeSocket) {
   console.log("'botCodeSocket' Sent:\n" + botCode);
 }
 
-var gameSocket = undefined;
 function connect_to_the_game() {
   var initialStateReceived = false;
 
@@ -48,14 +51,14 @@ function connect_to_the_game() {
   
   gameSocket.on("message", function () {
     if (initialStateReceived) {
-      receive_current_state(gameSocket);
-      update_bots(game);
-      update_bullets(game);
-      update_explosions(game);
-      update_bots_statistiques(game);
+      receive_current_state();
+      update_bots();
+      update_bullets();
+      update_explosions();
+      update_bots_statistiques();
     }
     else {
-      receive_initial_state(gameSocket);
+      receive_initial_state();
       initialStateReceived = true;
     }
   });
@@ -74,7 +77,7 @@ function exit_arena() {
   gameSocket.close();
 }
 
-function receive_initial_state(gameSocket) {
+function receive_initial_state() {
   game.width = gameSocket.rQshift16();
   game.height = gameSocket.rQshift16();
   game.numWalls = gameSocket.rQshift8();
@@ -115,10 +118,10 @@ function receive_initial_state(gameSocket) {
   console.log("Initial game state:");
   console.log(game);
   
-  create_view(game);
+  create_view();
 }
 
-function receive_current_state(gameSocket) {    
+function receive_current_state() {    
   // The bots.
   var buffer = 0;
   for (i = 0; i < game.numBots; i++) {
@@ -209,7 +212,7 @@ function degrees_to_radians(degrees) {
   return degrees * Math.PI / 180;
 };
 
-function create_view(game) {
+function create_view() {
   // create an new instance of a pixi container.
   var container = new PIXI.Container();
 
@@ -221,10 +224,10 @@ function create_view(game) {
   document.body.appendChild(renderer.view);
 
   // Create all the objects.
-  create_bots(game, container);
-  create_walls(game, container);
-  create_bullets(game, container);
-  create_explosions(game, container);
+  create_bots(container);
+  create_walls(container);
+  create_bullets(container);
+  create_explosions(container);
 
   // Display bots' statistiques.
   var botCaption = document.getElementById('BotCaption')
@@ -258,7 +261,7 @@ function create_view(game) {
   }
 }
 
-function update_bots(game) {
+function update_bots() {
   for (i = 0; i < game.numBots; i++) {
     // Draw the shape.
     game.bots[i].graphics.position.x = game.bots[i].x;
@@ -281,7 +284,7 @@ function update_bots(game) {
 }
 
 // This function is dissociated from update_bots() because update_bots() is called when the captions are not yet defined (when receiving the initial state).
-function update_bots_statistiques(game) {
+function update_bots_statistiques() {
   for (i = 0; i < game.numBots; i++) {
     game.bots[i].caption.life.innerHTML = game.bots[i].life;
     game.bots[i].caption.bullets.innerHTML = game.bots[i].bullets;
@@ -289,7 +292,7 @@ function update_bots_statistiques(game) {
   }
 }
 
-function update_bullets(game) {
+function update_bullets() {
   game.bulletGraphics.clear();
   for (i = 0; i < game.numBullets; i++) {
     game.bulletGraphics.lineStyle(2, 0x000000);
@@ -298,7 +301,7 @@ function update_bullets(game) {
   }
 }
 
-function update_explosions(game) {
+function update_explosions() {
   game.explosionsGraphics.clear();
   for (i = 0; i < game.numExplosions; i++) {
     if (game.explosions[i].radius < 4) { // The radius goes from 1 to 4.
@@ -328,7 +331,7 @@ function update_explosions(game) {
   }
 }
 
-function create_walls(game, container) {
+function create_walls(container) {
   for (i = 0; i < game.numWalls; i++) {
     game.walls[i].graphics = new PIXI.Graphics();
     game.walls[i].graphics.beginFill(0x808080);
@@ -339,7 +342,7 @@ function create_walls(game, container) {
   }
 }
 
-function create_bots(game, container) {
+function create_bots(container) {
   var botLength = 20;
   var botWidth = 2 * botLength / 3.5;
   for (i = 0; i < game.numBots; i++) {
@@ -360,15 +363,15 @@ function create_bots(game, container) {
     container.addChild(game.bots[i].scan.graphics);
   }
   
-  update_bots(game);
+  update_bots();
 }
 
-function create_bullets(game, container) {
+function create_bullets(container) {
   game.bulletGraphics = new PIXI.Graphics();
   container.addChild(game.bulletGraphics);
 }
 
-function create_explosions(game, container) {
+function create_explosions(container) {
   game.explosionsGraphics = new PIXI.Graphics();
   container.addChild(game.explosionsGraphics);
 }
