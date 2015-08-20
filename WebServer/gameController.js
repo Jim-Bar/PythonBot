@@ -1,6 +1,7 @@
 var editor = {};
 var game = {};
 var gameSocket = undefined;
+var gameRunning = false;
 
 function load_game() {
   editor = CodeMirror.fromTextArea(document.getElementById("editor"), {tabSize: 2, lineNumbers: true, undoDepth: 1000});
@@ -65,6 +66,9 @@ function connect_to_the_game() {
   
   gameSocket.on("close", function (event) {
     gameSocket.close();
+    gameSocket = {};
+    game = {};
+    gameRunning = false;
     console.log("'gameSocket' Disconnected with event: " + event);
   });
   
@@ -75,6 +79,7 @@ function connect_to_the_game() {
 
 function exit_arena() {
   gameSocket.close();
+  // All the code that terminates the game is in the 'close' event handler.
 }
 
 function receive_initial_state() {
@@ -228,6 +233,7 @@ function create_view() {
 
   // Display bots' statistiques.
   var botCaption = document.getElementById('BotCaption')
+  botCaption.innerHTML = ''; // Empty the object, as it can contain elements from a previous game.
   // Create the box containing the statistiques.
   for (i = 0; i < game.numBots; i++) {
     var innerHTML = '';
@@ -251,10 +257,13 @@ function create_view() {
   }
 
   // Start animation.
+  gameRunning = true;
   requestAnimFrame(animate);
   function animate() {
-      requestAnimFrame(animate);
       renderer.render(container);
+      if (gameRunning) {
+	requestAnimFrame(animate);
+      }
   }
 }
 
