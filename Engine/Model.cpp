@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <ctime>
 #include <cmath>
 #include <algorithm>
@@ -32,7 +33,7 @@ bool compare_bots(Object const *bot1, Object const *bot2)
   return ((Bot const*) bot1)->get_name() < ((Bot const*) bot2)->get_name();
 }
 
-Model::Model(unsigned int numBots, unsigned int port, unsigned int contactPort, unsigned int width, unsigned int height) : m_width(width), m_height(height)
+Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPort, unsigned int width, unsigned int height) : m_width(width), m_height(height)
 {
   // Initialize seed for random numbers.
   srand(time(0));
@@ -50,8 +51,44 @@ Model::Model(unsigned int numBots, unsigned int port, unsigned int contactPort, 
   
   // Initialize a listener for the incoming connections.
   sf::TcpListener tcpListener;
-  if (tcpListener.listen(port) != sf::Socket::Done)
-    std::cerr << "Error : Unable to bind the listener to port " << port << std::endl;
+  if (tcpListener.listen(botPort) != sf::Socket::Done)
+    std::cerr << "Error : Unable to bind the listener to port " << botPort << std::endl;
+  
+  // Send the bot socket port to the Python module...
+  if (contactPort > 0) // ...if a port for this has been provided.
+  {
+    sf::sleep(sf::milliseconds(500));
+    sf::TcpSocket contactSocket;
+    if (contactSocket.connect(sf::IpAddress::LocalHost, contactPort) == sf::Socket::Done) // Connect to the port provided.
+    {
+      char data[6] = {0}; // Size is 6 because the maximum value is 65535 (5 digits plus '\0').
+      int numCharacters(sprintf(data, "%u", tcpListener.getLocalPort())); // Do not use 'botPort' here as if it is zero (and it should be the case), a random port has been chosen.
+
+      // Send the port the server will listen on.
+      if (numCharacters > 0)
+      {
+	// Partial sends warning have been introduced in SFML 2.3. Up to 2.2, no need for using a third parameter for 'send()'.
+	#if SFML_VERSION_MAJOR == 2 && SFML_VERSION_MINOR <= 2
+	
+	if (contactSocket.send(data, numCharacters) != sf::Socket::Done)
+	  std::cerr << "Error : Sending bot socket port to the Python module failed" << std::endl;
+	
+	#else
+	
+	size_t sent(0);
+	if (contactSocket.send(data, numCharacters, sent) != sf::Socket::Done) // We use 'sent' to get rid of the SFML warning "Partial sends not handled properly".
+	  std::cerr << "Error : Sending bot socket port to the Python module failed" << std::endl;
+	
+	#endif
+      }
+      else
+	std::cerr << "Error : Unable to write the bot socket port to a buffer" << std::endl;
+      
+      contactSocket.disconnect();
+    }
+    else
+      std::cerr << "Error : Could not connect to the Python module to the specified port (" << contactPort << ")" << std::endl;
+  }
   
   // Add bots entities.
   std::cout << "Waiting for " << numBots << " bots..." << std::endl;

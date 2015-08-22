@@ -30,7 +30,7 @@ class Model
 {
 public:
   /* Constructor. */
-  Model(unsigned int numBots, unsigned int port, unsigned int contactPort = 0, unsigned int width = 800, unsigned int height = 600); // This is not the resolution, but the arena dimensions.
+  Model(unsigned int numBots, unsigned int botPort = 0, unsigned int contactPort = 0, unsigned int width = 800, unsigned int height = 600); // This is not the resolution, but the arena dimensions.
   ~Model();
   
   /* Getters. */

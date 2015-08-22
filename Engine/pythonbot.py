@@ -46,16 +46,23 @@ def launch_game():
     else:
       botModuleList.append(botModule)
 
-  # Launch the game.
-  port = get_free_port()
-  args = [path.join(getcwd(), 'pythonbot_core'), '-s', '-n', '{}'.format(len(botList)), '-b', '{}'.format(port)]
+  # Exchange ports, and launch the game.
+  tcpListener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Prepare the socket which will receive the port on which the engine is listening for bots.
+  tcpListener.bind(('localhost', 0))
+  contactPort = tcpListener.getsockname()[1] # Get the port on which the engine will send its port (see above).
+  args = [path.join(getcwd(), 'pythonbot_core'), '-s', '-n', '{}'.format(len(botList)), '-c', '{}'.format(contactPort)] # Prepare command to execute to start the game.
   print('Lauching {} {} {} {} {} {}'.format(args[0], args[1], args[2], args[3], args[4], args[5]))
-  Popen(args)
+  Popen(args) # Start the game !
+  tcpListener.listen(1) # Only one client will connect (the engine), no need for queueing.
+  contactSocket = tcpListener.accept()[0] # Accept the connection.
+  botPort = int(contactSocket.recv(6).decode()) # Receive the port.
+  contactSocket.close()
+  tcpListener.close()
 
   # Launch the bots.
   threads = []
   for i in range(0, len(botList)):
-    thread = threading.Thread(None, load_bot, 'pythonbot_bot_{}'.format(i), (botModuleList[i], port, botList[i]))
+    thread = threading.Thread(None, load_bot, 'pythonbot_bot_{}'.format(i), (botModuleList[i], botPort, botList[i]))
     thread.start()
     threads.append(thread)
 
