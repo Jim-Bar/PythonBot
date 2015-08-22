@@ -5,7 +5,7 @@ from time import sleep
 
 # Server configuration.
 host = '127.0.0.1' # We are the host.
-port = 5009 # Port to listen to.
+port = 5006 # Port to listen to.
 bufferSize = 256 # Maximum data we will receive.
 
 # Create a new TCP socket.
@@ -16,18 +16,18 @@ try:
   
   while True:
     tcpListener.listen(5) # Allow at most 5 queued connections.
-    print 'Listening on 0.0.0.0 port {}...'.format(port)
+    print('Listening on 0.0.0.0 port {}...'.format(port))
 
     tcpSocket, address = tcpListener.accept() # Accept the connection.
-    print 'A client just connected: {}'.format(address)
+    print('A client just connected: {}'.format(address))
     botCode = ''
-    botCode = tcpSocket.recv(bufferSize)
+    botCode = tcpSocket.recv(bufferSize).decode()
     if botCode == '':
-      print 'Received empty string ! Closing down.'
+      print('Received empty string ! Closing down.')
     else:
-      print 'Received:\n"\n{}\n"\nfrom {}'.format(botCode, address)
+      print('Received:\n"\n{}\n"\nfrom {}'.format(botCode, address))
     tcpSocket.close()
-    print 'Connection with {} closed'.format(address)
+    print('Connection with {} closed'.format(address))
     
     try:
       os.remove(os.path.join('Bots', 'imported.pyc')) # Remove the previously compiled bot file.
@@ -39,4 +39,4 @@ try:
     pythonbot.launch_game()
 except KeyboardInterrupt:
   tcpListener.close()
-  print 'Exited'
+  print('Exited')

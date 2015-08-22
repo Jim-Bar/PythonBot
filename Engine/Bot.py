@@ -17,9 +17,8 @@
 # Refer to 'LICENSE.txt' for the full notice.
 
 
-# Python version 2.7
-from __future__ import print_function # Quick and dirty hack for getting 'thread safe' prints.
-from sys import stdout # For the above mentioned hack.
+# Python version 2.7 or 3.3+
+from sys import stdout # Quick and dirty hack for getting 'thread safe' prints.
 from time import sleep
 from re import findall
 import socket
@@ -36,7 +35,7 @@ class Bot:
     while attemptsLeft > 0:
       try:
         self.tcpSocket.connect((host, port))
-      except Exception, exception: # If the connection has failed, the server is probably not ready yet...
+      except Exception as exception: # If the connection has failed, the server is probably not ready yet...
         if attemptsLeft < 10: # Print the error only from the second time since the first try is usually a fail.
           safe_print('Warning : Connection to {}:{} failed (attempt {} over 10) : {}'.format(host, port, 10 - attemptsLeft + 1, exception))
         attemptsLeft = attemptsLeft - 1 # ...so we prepare another try (up to 10)...
@@ -65,23 +64,23 @@ class Bot:
 
   def skip(self):
     # Format : "0".
-    data = b'0'
+    data = '0'
     self._communicate(data)
 
   def move(self):
     # Format : "1".
-    data = b'1'
+    data = '1'
     self._communicate(data)
 
   def rotate(self, degrees):
     # Format : "2 numDegrees" where 'numDegrees' is a signed integer.
-    data = b'2 {}'.format(int(degrees))
+    data = '2 {}'.format(int(degrees))
     self._communicate(data)
 
   # Return the number of bullets left.
   def fire(self):
     # Format : "3".
-    data = b'3'
+    data = '3'
     self._communicate(data)
 
   # Do not scan the bot itself nor its bullets nor dead bots. 'scanCircles' includes world's edges.
@@ -94,7 +93,7 @@ class Bot:
       objectScanned |= 2
     if scanBullets:
       objectScanned |= 4
-    data = b'4 {} {} {}'.format(int(distance), int(radius), objectScanned)
+    data = '4 {} {} {}'.format(int(distance), int(radius), objectScanned)
     data = self._communicate(data)
     return tuple(data[n] for n in range(3, 6))
 

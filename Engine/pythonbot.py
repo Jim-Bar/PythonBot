@@ -17,7 +17,7 @@
 # Refer to 'LICENSE.txt' for the full notice.
 
 
-# Python version 2.7
+# Python version 2.7 or 3.3+
 from os import path # To construct cross-compatible paths.
 from os import getcwd # To get the current working directory (cross-compatible paths again).
 from glob import glob
@@ -32,7 +32,7 @@ def launch_game():
   # Detect bots.
   botList = glob(path.join('Bots', '*.py'))
   botList = [bot[5:-3] for bot in botList if bot != path.join('Bots', '__init__.py')] # Remove 'Bots/' and '.py' in the names, and __init__.py from the names.
-  print 'Bots detected : {}'.format(botList)
+  print('Bots detected : {}'.format(botList))
   
   # Import the bots and check that they compile.
   botModuleList = []
@@ -40,8 +40,8 @@ def launch_game():
   for bot in list(botList): # Iterate over a copy to be able to remove elements during the iteration process.
     try:
       botModule = import_module('Bots.' + bot) # Import the bot python file.
-    except Exception, exception:
-      print 'Error : Problem with bot {} : {}'.format(bot, exception)
+    except Exception as exception:
+      print('Error : Problem with bot {} : {}'.format(bot, exception))
       botList.remove(bot)
     else:
       botModuleList.append(botModule)
@@ -49,7 +49,7 @@ def launch_game():
   # Launch the game.
   port = get_free_port()
   args = [path.join(getcwd(), 'pythonbot_core'), '{}'.format(port), '{}'.format(len(botList))]
-  print 'Lauching {} {} {}'.format(args[0], args[1], args[2])
+  print('Lauching {} {} {}'.format(args[0], args[1], args[2]))
   Popen(args)
 
   # Launch the bots.
@@ -62,7 +62,7 @@ def launch_game():
   # Wait for the bots to finish.
   for thread in threads:
     thread.join()
-  print 'All threads joined'
+  print('All threads joined')
 
 # Return a free port on localhost. Note that another process could bind a socket to that port after it is closed.
 def get_free_port():
@@ -81,10 +81,10 @@ def load_bot(botModule, port, botName):
   bot = Bot.Bot(port, botName) # Create the bot.
   try:
     botModule.main(bot) # Run the bot !
-  except socket.error, exception: # The exception is raised when the socket is closed on server's side.
+  except socket.error as exception: # The exception is raised when the socket is closed on server's side.
     Bot.safe_print('Bot {} shut down'.format(botName))
     del bot
-  except Exception, exception: # Unexpected error (usually function main missing).
+  except Exception as exception: # Unexpected error (usually function main missing).
     Bot.safe_print('Error : Problem with bot {} : {}'.format(botName, exception))
     del bot
 
