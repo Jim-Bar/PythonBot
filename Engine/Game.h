@@ -18,32 +18,22 @@
  * Refer to 'LICENSE.txt' for the full notice.
  */
 
-#ifndef CONTROLLER__HEADER
-#define CONTROLLER__HEADER
+#ifndef GAME__HEADER
+#define GAME__HEADER
 
-#include "Model.h"
-#include "View.h"
+#include "Parser.h"
 
-class Controller
+class Game
 {
 public:
   /* Constructor. */
-  Controller(Model& model, View& view, bool startPaused = true);
-  
-  /* Game loop. */
-  void loop();
+  Game(int argc, char *argv[]);
+
+  /* Start the game. Return 'true' when the game terminates successfully, 'false' otherwise. */
+  bool start() const;
 
 private:
-  bool m_startPaused;
-  
-  Model& m_model;
-  View& m_view;
-
-  /* Manage bullets' movements, collisions... */
-  void update_bullets();
-  
-  /* Communicate with the bots, move them... */
-  void update_bots();
+  Parser m_parser;
 };
 
 #endif

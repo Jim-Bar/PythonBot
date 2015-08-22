@@ -32,7 +32,7 @@ bool compare_bots(Object const *bot1, Object const *bot2)
   return ((Bot const*) bot1)->get_name() < ((Bot const*) bot2)->get_name();
 }
 
-Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsigned int height) : m_width(width), m_height(height)
+Model::Model(unsigned int numBots, unsigned int port, unsigned int contactPort, unsigned int width, unsigned int height) : m_width(width), m_height(height)
 {
   // Initialize seed for random numbers.
   srand(time(0));

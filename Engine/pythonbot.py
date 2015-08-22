@@ -48,8 +48,8 @@ def launch_game():
 
   # Launch the game.
   port = get_free_port()
-  args = [path.join(getcwd(), 'pythonbot_core'), '{}'.format(port), '{}'.format(len(botList))]
-  print('Lauching {} {} {}'.format(args[0], args[1], args[2]))
+  args = [path.join(getcwd(), 'pythonbot_core'), '-s', '-n', '{}'.format(len(botList)), '-b', '{}'.format(port)]
+  print('Lauching {} {} {} {} {} {}'.format(args[0], args[1], args[2], args[3], args[4], args[5]))
   Popen(args)
 
   # Launch the bots.

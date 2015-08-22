@@ -20,13 +20,13 @@
 
 #include "Controller.h"
 
-Controller::Controller(Model& model, View& view) : m_model(model), m_view(view)
+Controller::Controller(Model& model, View& view, bool startPaused) : m_startPaused(startPaused), m_model(model), m_view(view)
 {}
 
 void
 Controller::loop()
 {
-  bool gameFinished(false), paused(false);
+  bool gameFinished(false), paused(m_startPaused);
   
   while (!gameFinished)
   {
