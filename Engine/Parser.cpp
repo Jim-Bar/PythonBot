@@ -6,12 +6,15 @@
 
 Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_parsingSucceeded(true), m_isServer(false), m_startPaused(false), m_numBots(0), m_botSocketPort(0), m_contactSocketPort(0)
 {
+  // 's' like 'Server'. Will run in remote view mode.
   if (has_command_option("-s"))
     m_isServer = true;
   
+  // 'p' like 'Paused'. Will start paused.
   if (has_command_option("-p"))
     m_startPaused = true;
   
+  // 'n' like 'Number' of bots.
   if (has_command_option("-n"))
   {
     int numBots(atoi(get_command_option("-n")));
@@ -25,19 +28,20 @@ Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_pa
   }
   
   int port(0);
-  if (has_command_option("-b"))
+  if (has_command_option("-b")) // 'b' like 'Bot' socket. Port to be used by the bots to connect to the game.
   {
     port = atoi(get_command_option("-b"));
     if (port > 0)
       m_botSocketPort = (unsigned int) port;
   }
-  else if (has_command_option("-c"))
+  else if (has_command_option("-c")) // 'c' like 'Contact' socket. Port to be used to send the port chosen for the bot socket back to the Python module.
   {
     port = atoi(get_command_option("-c"));
     if (port > 0)
       m_contactSocketPort = (unsigned int) port;
   }
   
+  // We need at least (and probably at most) a port: if we have no port assigned, and no possibility to chose one, then the game cannot work.
   if (m_botSocketPort == 0 && m_contactSocketPort == 0)
   {
     print_usage_with_error("The bot socket port or the contact socket port must be provided");
