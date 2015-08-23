@@ -67,19 +67,8 @@ Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPor
       // Send the port the server will listen on.
       if (numCharacters > 0)
       {
-	// Partial sends warning have been introduced in SFML 2.3. Up to 2.2, no need for using a third parameter for 'send()'.
-	#if SFML_VERSION_MAJOR == 2 && SFML_VERSION_MINOR <= 2
-	
 	if (contactSocket.send(data, numCharacters) != sf::Socket::Done)
 	  std::cerr << "Error : Sending bot socket port to the Python module failed" << std::endl;
-	
-	#else
-	
-	size_t sent(0);
-	if (contactSocket.send(data, numCharacters, sent) != sf::Socket::Done) // We use 'sent' to get rid of the SFML warning "Partial sends not handled properly".
-	  std::cerr << "Error : Sending bot socket port to the Python module failed" << std::endl;
-	
-	#endif
       }
       else
 	std::cerr << "Error : Unable to write the bot socket port to a buffer" << std::endl;
