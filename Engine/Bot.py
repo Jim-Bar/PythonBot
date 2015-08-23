@@ -36,10 +36,10 @@ class Bot:
       try:
         self.tcpSocket.connect((host, port))
       except Exception as exception: # If the connection has failed, the server is probably not ready yet...
-        if attemptsLeft < 10: # Print the error only from the second time since the first try is usually a fail.
+        if attemptsLeft < 10: # Print the error only after the second time since the first try is usually a fail.
           safe_print('Warning : Connection to {}:{} failed (attempt {} over 10) : {}'.format(host, port, 10 - attemptsLeft + 1, exception))
         attemptsLeft = attemptsLeft - 1 # ...so we prepare another try (up to 10)...
-        sleep(0.1) # ...after waiting a little.
+        sleep(0.01) # ...after waiting a little.
       else: # The connection succeeded.
         safe_print('Bot {} connected to the game'.format(botName))
         attemptsLeft = 0
