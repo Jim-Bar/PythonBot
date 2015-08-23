@@ -54,7 +54,7 @@ Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_pa
     if (has_command_option("-s"))
     {
       m_isServer = true;
-      if (has_command_option("-r"))
+      if (has_command_option("-r")) // 'r' like 'Remote' socket. Port to be used by the clients to receive the game state.
       {
 	port = atoi(get_command_option("-r"));
 	if (port > 0)
