@@ -101,6 +101,9 @@ Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_pa
   // Print a warning if both bot socket and contact socket ports are provided. It makes no sense of providing a port, and then expecting to receive it.
   if (has_command_option("-c") && has_command_option("-b"))
     print_usage_with_warning("Both bot socket and contact socket ports are provided. Bot socket port ignored");
+  // Same with remote socket.
+  if (has_command_option("-c") && has_command_option("-r"))
+    print_usage_with_warning("Both remote socket and contact socket ports are provided. Remote socket port ignored");
 }
 
 bool
