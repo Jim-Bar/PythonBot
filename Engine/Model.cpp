@@ -54,12 +54,21 @@ Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPor
   if (tcpListener.listen(botPort) != sf::Socket::Done)
     std::cerr << "Error : Unable to bind the listener to port " << botPort << std::endl;
   
-  // Send the bot socket port to the Python module...
+  // Send the bot socket port to the peer...
   if (contactPort > 0) // ...if a port for this has been provided.
   {
-    sf::sleep(sf::milliseconds(500));
     sf::TcpSocket contactSocket;
-    if (contactSocket.connect(sf::IpAddress::LocalHost, contactPort) == sf::Socket::Done) // Connect to the port provided.
+    sf::Socket::Status connectionStatus;
+    unsigned int attemptsLeft(10);
+    do
+    {
+      connectionStatus = contactSocket.connect(sf::IpAddress::LocalHost, contactPort); // Connect to the port provided.
+      if (connectionStatus != sf::Socket::Done) // If the connection fails, the peer is probably not ready yet.
+	sf::sleep(sf::milliseconds(10)); // Wait a little before retrying.
+      attemptsLeft--;
+    } while (connectionStatus != sf::Socket::Done && attemptsLeft > 0);
+    
+    if (connectionStatus == sf::Socket::Done)
     {
       char data[6] = {0}; // Size is 6 because the maximum value is 65535 (5 digits plus '\0').
       int numCharacters(sprintf(data, "%u", tcpListener.getLocalPort())); // Do not use 'botPort' here as if it is zero (and it should be the case), a random port has been chosen.
