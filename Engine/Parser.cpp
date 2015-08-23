@@ -4,16 +4,8 @@
 #
 #include "Parser.h"
 
-Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_parsingSucceeded(true), m_isServer(false), m_startPaused(false), m_numBots(0), m_botSocketPort(0), m_contactSocketPort(0)
+Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_parsingSucceeded(true), m_isServer(false), m_startPaused(false), m_numBots(0), m_botSocketPort(0), m_remoteSocketPort(0), m_contactSocketPort(0)
 {
-  // 's' like 'Server'. Will run in remote view mode.
-  if (has_command_option("-s"))
-    m_isServer = true;
-  
-  // 'p' like 'Paused'. Will start paused.
-  if (has_command_option("-p"))
-    m_startPaused = true;
-  
   // 'n' like 'Number' of bots.
   if (has_command_option("-n"))
   {
@@ -27,26 +19,68 @@ Parser::Parser(int argc, char *argv[]) : m_begin(argv), m_end(argv + argc), m_pa
     }
   }
   
+  // 'p' like 'Paused'. Will start paused.
+  if (has_command_option("-p"))
+    m_startPaused = true;
+  
   int port(0);
-  if (has_command_option("-b")) // 'b' like 'Bot' socket. Port to be used by the bots to connect to the game.
-  {
-    port = atoi(get_command_option("-b"));
-    if (port > 0)
-      m_botSocketPort = (unsigned int) port;
-  }
-  else if (has_command_option("-c")) // 'c' like 'Contact' socket. Port to be used to send the port chosen for the bot socket back to the Python module.
+  if (has_command_option("-c")) // 'c' like 'Contact' socket. Port to be used to send the port chosen for the bot socket back to the Python module.
   {
     port = atoi(get_command_option("-c"));
     if (port > 0)
       m_contactSocketPort = (unsigned int) port;
+    else
+    {
+      print_usage_with_error("Could not read contact socket port");
+      m_parsingSucceeded = false;
+    }
+    
+    // 's' like 'Server'. Will run in remote view mode.
+    if (has_command_option("-s"))
+      m_isServer = true;
   }
-  
-  // We need at least (and probably at most) a port: if we have no port assigned, and no possibility to chose one, then the game cannot work.
-  if (m_botSocketPort == 0 && m_contactSocketPort == 0)
+  else if (has_command_option("-b")) // 'b' like 'Bot' socket. Port to be used by the bots to connect to the game.
   {
-    print_usage_with_error("The bot socket port or the contact socket port must be provided");
+    port = atoi(get_command_option("-b"));
+    if (port > 0)
+      m_botSocketPort = (unsigned int) port;
+    else
+    {
+      print_usage_with_error("Could not read bot socket port");
+      m_parsingSucceeded = false;
+    }
+    
+    // 's' like 'Server'. Will run in remote view mode.
+    if (has_command_option("-s"))
+    {
+      m_isServer = true;
+      if (has_command_option("-r"))
+      {
+	port = atoi(get_command_option("-r"));
+	if (port > 0)
+	  m_remoteSocketPort = (unsigned int) port;
+	else
+	{
+	  print_usage_with_error("Could not read remote socket port");
+	  m_parsingSucceeded = false;
+	}
+      }
+      else
+      {
+	print_usage_with_error("The remote socket port must be provided when in server mode and not using the contact socket");
+	m_parsingSucceeded = false;
+      }
+    }
+  }
+  else
+  {
+    print_usage_with_error("Either the contact socket port or the bot socket port must be provided");
     m_parsingSucceeded = false;
   }
+  
+  // Print a warning if both bot socket and contact socket ports are provided. It makes no sense of providing a port, and then expecting to receive it.
+  if (has_command_option("-c") && has_command_option("-b"))
+    print_usage_with_warning("Both bot socket and contact socket ports are provided. Bot socket port ignored");
 }
 
 bool
@@ -74,15 +108,21 @@ Parser::get_num_bots() const
 }
 
 unsigned int
-Parser::get_contact_socket_port() const
-{
-  return m_contactSocketPort;
-}
-
-unsigned int
 Parser::get_bot_socket_port() const
 {
   return m_botSocketPort;
+}
+
+unsigned int
+Parser::get_remote_socket_port() const
+{
+  return m_remoteSocketPort;
+}
+
+unsigned int
+Parser::get_contact_socket_port() const
+{
+  return m_contactSocketPort;
 }
 
 bool
@@ -102,10 +142,22 @@ Parser::get_command_option(std::string const& option)
 }
 
 void
+Parser::print_usage_with_warning(char const *warning)
+{
+  print_usage_with_level("Warning", warning);
+}
+
+void
 Parser::print_usage_with_error(char const *error)
 {
+  print_usage_with_level("Error", error);
+}
+
+void
+Parser::print_usage_with_level(char const *level, char const *message)
+{
   std::cerr << "Usage:" << std::endl;
-  std::cerr << "  " << *m_begin << " [-p] [-s] [-b bot_socket_port | -c contact_socket_port]" << std::endl;
+  std::cerr << "  " << *m_begin << " -n {num_bots} [-p] [-c {contact_socket_port} [-s] | -b {bot_socket_port} [-s -r {remote_socket_port}]]" << std::endl;
   std::cerr << std::endl;
-  std::cerr << *m_begin << ": Error: " << error << std::endl;
+  std::cerr << *m_begin << ": " << level << " : " << message << std::endl;
 }

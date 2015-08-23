@@ -34,8 +34,9 @@ public:
   bool is_server() const;
   bool start_paused() const;
   unsigned int get_num_bots() const;
-  unsigned int get_contact_socket_port() const;
   unsigned int get_bot_socket_port() const;
+  unsigned int get_remote_socket_port() const;
+  unsigned int get_contact_socket_port() const;
 
 private:
   char **m_begin;
@@ -46,11 +47,15 @@ private:
   bool m_startPaused; // 'true' means the game should be paused on the beginning.
   unsigned int m_numBots;
   unsigned int m_botSocketPort;
+  unsigned int m_remoteSocketPort;
   unsigned int m_contactSocketPort;
   
   bool has_command_option(std::string const& option);
   char* get_command_option(std::string const& option);
+  
+  void print_usage_with_warning(char const *warning);
   void print_usage_with_error(char const *error);
+  void print_usage_with_level(char const *level, char const *message);
 };
 
 #endif
