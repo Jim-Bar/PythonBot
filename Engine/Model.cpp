@@ -51,7 +51,7 @@ Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPor
   
   // Initialize a listener for the incoming connections.
   sf::TcpListener tcpListener;
-  if (tcpListener.listen(botPort) != sf::Socket::Done)
+  if (tcpListener.listen(botPort > 0 ? botPort : sf::Socket::AnyPort) != sf::Socket::Done)
     std::cerr << "Error : Unable to bind the listener to port " << botPort << std::endl;
   
   // Send the bot socket port to the peer...
