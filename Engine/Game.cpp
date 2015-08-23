@@ -45,7 +45,7 @@ Game::start() const
     if (m_parser.is_server()) // Local view.
     {
       Model model(m_parser.get_num_bots(), m_parser.get_bot_socket_port(), m_parser.get_contact_socket_port());
-      RemoteView view(model);
+      RemoteView view(model, m_parser.get_remote_socket_port(), m_parser.get_contact_socket_port());
       Controller controller(model, view, m_parser.start_paused());
       
       controller.loop();

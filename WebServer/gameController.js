@@ -30,6 +30,13 @@ function open_websocket() {
   
   controlSocket.on("message", function () {
     console.log("'controlSocket' Received a message");
+    port = controlSocket.rQshiftStr(controlSocket.rQlen());
+    if (port > 0) {
+      connect_to_the_game(port);
+    }
+    else {
+      console.error("'controlSocket' Error: Server internal error (received port is " + port + ")");
+    }
   });
   
   controlSocket.on("close", function (event) {
@@ -48,11 +55,11 @@ function send_bot_code(controlSocket) {
   console.log("'controlSocket' Sent:\n" + botCode);
 }
 
-function connect_to_the_game() {
+function connect_to_the_game(port) {  
   var initialStateReceived = false;
 
   gameSocket = new Websock();
-  gameSocket.open("ws://127.0.0.1:6005");
+  gameSocket.open("ws://127.0.0.1:" + port);
   
   gameSocket.on("open", function () {
     console.log("'gameSocket' Connected");

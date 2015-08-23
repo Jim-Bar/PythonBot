@@ -25,7 +25,7 @@ from time import sleep
 
 # Server configuration.
 host = '127.0.0.1' # We are the host.
-port = 5007 # Port to listen to.
+port = 5006 # Port to listen to.
 bufferSize = 256 # Maximum data we will receive.
 
 # Create a new TCP socket.
@@ -46,7 +46,7 @@ try:
       print('Received empty string ! Closing down.')
     else:
       print('Received:\n"\n{}\n"\nfrom {}'.format(botCode, address))
-    tcpSocket.close()
+    #tcpSocket.close()
     print('Connection with {} closed'.format(address))
     
     try:
@@ -56,7 +56,7 @@ try:
     botFile = open(os.path.join('Bots', 'imported.py'), 'w')
     botFile.write(botCode)
     botFile.close()
-    pythonbot.launch_game()
+    pythonbot.launch_game(tcpSocket)
 except KeyboardInterrupt:
   tcpListener.close()
   print('Exited')

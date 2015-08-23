@@ -21,11 +21,12 @@
 
 if [ $# -ne 1 ]; then
   echo "Error: usage is $0 target_port" 1>&2
-  exit 0
+  echo 0 # Output 0 as port.
+  exit 1
 fi
 
 netstat -tlpn 2> /dev/null | grep python > openPortsBefore # '2> /dev/null' hide warning (not running as root).
-websockify --timeout=2 --idle-timeout=2 --run-once 0 127.0.0.1:$1 > /dev/null & # Start Websockify on a random port, with timeouts in case of fail.
+websockify --timeout=5 --idle-timeout=5 --run-once 0 127.0.0.1:$1 > /dev/null & # Start Websockify on a random port, with timeouts in case of fail.
 sleep 0.1 # Wait for Websockify to start listening on a port.
 netstat -tlpn 2> /dev/null | grep python > openPortsAfter # '2> /dev/null' hide warning (not running as root).
 netStatLine=$(diff openPortsBefore openPortsAfter) # Select lines (hopefully only one) which as showed up.
@@ -35,8 +36,9 @@ rm openPortsBefore openPortsAfter # Remove the files that are not needed anymore
 
 if [ -z $port ]; then
   echo "Error: could not retrieve the port on which Websockify is listening" 1>&2
-  exit 0
+  echo 0 # Output 0 as port.
+  exit 1
 fi
 
-echo "Started Websockify (source port: $port, target port: $1)"
-exit $port # Output the port.
+echo $port # Output the port.
+exit 0

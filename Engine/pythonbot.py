@@ -22,13 +22,14 @@ from os import path # To construct cross-compatible paths.
 from os import getcwd # To get the current working directory (cross-compatible paths again).
 from glob import glob
 from subprocess import Popen
+from subprocess import check_output
 from importlib import import_module
 import threading
 import socket
 import Bot
 
 # Load bots, launch the game and bots.
-def launch_game():
+def launch_game(clientSocket):
   # Detect bots.
   botList = glob(path.join('Bots', '*.py'))
   botList = [bot[5:-3] for bot in botList if bot != path.join('Bots', '__init__.py')] # Remove 'Bots/' and '.py' in the names, and __init__.py from the names.
@@ -46,25 +47,46 @@ def launch_game():
     else:
       botModuleList.append(botModule)
 
-  # Exchange ports, and launch the game.
+  # Exchange ports, and launch the engine.
   tcpListener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Prepare the socket which will receive the port on which the engine is listening for bots.
   tcpListener.bind(('localhost', 0))
   contactPort = tcpListener.getsockname()[1] # Get the port on which the engine will send its port (see above).
-  args = [path.join(getcwd(), 'pythonbot_core'), '-s', '-n', '{}'.format(len(botList)), '-c', '{}'.format(contactPort)] # Prepare command to execute to start the game.
+  args = [path.join(getcwd(), 'pythonbot_core'), '-s', '-n', '{}'.format(len(botList)), '-c', '{}'.format(contactPort)] # Prepare command to execute to start the engine.
   print('Lauching {} {} {} {} {} {}'.format(args[0], args[1], args[2], args[3], args[4], args[5]))
-  Popen(args) # Start the game !
+  Popen(args) # Start the engine !
+  
+  # Receive the port to which bots will talk.
   tcpListener.listen(1) # Only one client will connect (the engine), no need for queueing.
   contactSocket = tcpListener.accept()[0] # Accept the connection.
   botPort = int(contactSocket.recv(6).decode()) # Receive the port.
   contactSocket.close()
-  tcpListener.close()
-
+  print('Received port for bots : {}'.format(botPort))
+  
   # Launch the bots.
   threads = []
   for i in range(0, len(botList)):
     thread = threading.Thread(None, load_bot, 'pythonbot_bot_{}'.format(i), (botModuleList[i], botPort, botList[i]))
     thread.start()
-    threads.append(thread)
+    threads.append(thread)  
+  
+  # Receive the port to which clients will connect.
+  tcpListener.listen(1) # Only one client will connect (the engine), no need for queueing.
+  contactSocket = tcpListener.accept()[0] # Accept the connection.
+  remotePort = int(contactSocket.recv(6).decode()) # Receive the port.
+  contactSocket.close()
+  print('Received port for Websockify: {}'.format(remotePort))
+  tcpListener.close()
+  
+  # Launch Websockify.
+  args = [path.join(getcwd(), 'websockifyLauncher.sh') + ' ' + str(remotePort)] # Cannot separate arguments, because of 'shell=True' (would be passed to the shell instead of the script).
+  print('Lauching {}'.format(args[0]))
+  clientPort = int(check_output(args, shell=True))
+  if clientPort == 0:
+    print('Error : Could not retrieve Websockify port')
+  else:
+    print('Received port for clients: {}'.format(clientPort))
+  clientSocket.send('{}'.format(clientPort).encode()) # Even if it is 0, send it to the client (it will handle 0 as an error).
+  clientSocket.close()
 
   # Wait for the bots to finish.
   for thread in threads:

@@ -77,7 +77,7 @@ Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPor
       if (numCharacters > 0)
       {
 	if (contactSocket.send(data, numCharacters) != sf::Socket::Done)
-	  std::cerr << "Error : Sending bot socket port to the Python module failed" << std::endl;
+	  std::cerr << "Error : Sending bot socket port to the peer failed" << std::endl;
       }
       else
 	std::cerr << "Error : Unable to write the bot socket port to a buffer" << std::endl;
@@ -85,7 +85,7 @@ Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPor
       contactSocket.disconnect();
     }
     else
-      std::cerr << "Error : Could not connect to the Python module to the specified port (" << contactPort << ")" << std::endl;
+      std::cerr << "Error : Could not connect to the peer to the specified port (" << contactPort << ")" << std::endl;
   }
   
   // Add bots entities.

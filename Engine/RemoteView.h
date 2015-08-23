@@ -27,7 +27,7 @@ class RemoteView : public View
 {
 public:
   /* Constructor. */
-  RemoteView(Model const& model);
+  RemoteView(Model const& model, unsigned int remotePort = 0, unsigned int contactPort = 0);
   
   /* Deal with events. */
   EventRequest read_events();

@@ -18,24 +18,58 @@
  * Refer to 'LICENSE.txt' for the full notice.
  */
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #
 #include "RemoteView.h"
 
-RemoteView::RemoteView(Model const& model) : m_model(model), m_clientDisconnected(false)
+RemoteView::RemoteView(Model const& model, unsigned int remotePort, unsigned int contactPort) : m_model(model), m_clientDisconnected(false)
 {
   sf::TcpListener tcpListener;
-  unsigned int port(6006);
   
   // Initialize listener for the incoming connections.
-  if (tcpListener.listen(port) != sf::Socket::Done)
+  if (tcpListener.listen(remotePort > 0 ? remotePort : (unsigned int) sf::Socket::AnyPort) != sf::Socket::Done)
   {
-    std::cerr << "Error : Unable to bind the listener to port " << port << std::endl;
+    std::cerr << "Error : Unable to bind the listener to port " << remotePort << std::endl;
     m_clientDisconnected = true; // Say the client is disconnected to stop the game.
   }
   
-  // Accept connection from a bot.
+  // Send the remote socket port to the peer...
+  if (contactPort > 0) // ...if a port for this has been provided.
+  {
+    sf::TcpSocket contactSocket;
+    sf::Socket::Status connectionStatus;
+    unsigned int attemptsLeft(10);
+    do
+    {
+      connectionStatus = contactSocket.connect(sf::IpAddress::LocalHost, contactPort); // Connect to the port provided.
+      if (connectionStatus != sf::Socket::Done) // If the connection fails, the peer is probably not ready yet.
+	sf::sleep(sf::milliseconds(10)); // Wait a little before retrying.
+      attemptsLeft--;
+    } while (connectionStatus != sf::Socket::Done && attemptsLeft > 0);
+    
+    if (connectionStatus == sf::Socket::Done)
+    {
+      char data[6] = {0}; // Size is 6 because the maximum value is 65535 (5 digits plus '\0').
+      int numCharacters(sprintf(data, "%u", tcpListener.getLocalPort())); // Do not use 'remotePort' here as if it is zero (and it should be the case), a random port has been chosen.
+
+      // Send the port the server will listen on.
+      if (numCharacters > 0)
+      {
+	if (contactSocket.send(data, numCharacters) != sf::Socket::Done)
+	  std::cerr << "Error : Sending remote socket port to the peer failed" << std::endl;
+      }
+      else
+	std::cerr << "Error : Unable to write the remote socket port to a buffer" << std::endl;
+      
+      contactSocket.disconnect();
+    }
+    else
+      std::cerr << "Error : Could not connect to the peer to the specified port (" << contactPort << ")" << std::endl;
+  }
+  
+  // Accept connection from a client.
   std::cout << "Waiting for a client..." << std::endl;
   if (tcpListener.accept(m_tcpClient) == sf::Socket::Done)
   {
