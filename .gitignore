@@ -9,3 +9,6 @@
 
 # Core program
 pythonbot_core
+
+# IDEs
+.idea
