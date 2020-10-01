@@ -1,6 +1,6 @@
 # What is PythonBot ?
 
-PythonBot is a game where you write an AI (in Python) which will fight in an arena for its survival.
+PythonBot is a game where you can write an AI (in Python) which will fight in an arena for its survival.
 
 Each bot in the arena has its own AI, written by a player. The bot can move around, scan its environment, and shoot bullets at others. The game ends when there is only one survivor (or when the game master decide to stop it, as it can be very long), but you can also attribute victory on other critters (like the number of kills among the survivors).
 
@@ -133,3 +133,4 @@ I am no longer releasing updates as I consider that the game reached a really go
 *Refer to 'LICENSE.txt' for the full notice.*
 
 The license apply for all source files (both C++ and Python), `README.md` and `LICENSE.txt`. The bots provided in `Bots/` and `BotLibrary/` are not part of the license. The Makefile, and Git-related files (`.gitignore`) are not part of the license.
+This is a wonderfull game and you should try it
