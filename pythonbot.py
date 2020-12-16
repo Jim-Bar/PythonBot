@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # PythonBot - A game by a developer for developers.
 # Copyright (C) 2015 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
 
@@ -17,86 +19,91 @@
 # Refer to 'LICENSE.txt' for the full notice.
 
 
-# Python version 2.7 or 3.3+
-from os import path # To construct cross-compatible paths.
-from os import getcwd # To get the current working directory (cross-compatible paths again).
-from glob import glob
-from subprocess import Popen
-from subprocess import check_output
-from importlib import import_module
-import threading
-import socket
 import Bot
+import glob
+import importlib
+import os
+import socket
+import subprocess
+import threading
+
 
 # Load bots, launch the game and bots.
 def launch_game():
-  # Detect bots.
-  botList = glob(path.join('Bots', '*.py'))
-  botList = [bot[5:-3] for bot in botList if bot != path.join('Bots', '__init__.py')] # Remove 'Bots/' and '.py' in the names, and __init__.py from the names.
-  print('Bots detected : {}'.format(botList))
-  
-  # Import the bots and check that they compile.
-  botModuleList = []
-  open(path.join('Bots', '__init__.py'), 'w').close() # Create a __init__.py file in the Bots/ directory (to get import_module() function working).
-  for bot in list(botList): # Iterate over a copy to be able to remove elements during the iteration process.
-    try:
-      botModule = import_module('Bots.' + bot) # Import the bot python file.
-    except Exception as exception:
-      print('Error : Problem with bot {} : {}'.format(bot, exception))
-      botList.remove(bot)
-    else:
-      botModuleList.append(botModule)
+    # Detect bots.
+    bots = glob.glob(os.path.join('Bots', '*.py'))
+    # Remove 'Bots/' and '.py' in the names, and __init__.py from the names.
+    bots = [bot[5:-3] for bot in bots if bot != os.path.join('Bots', '__init__.py')]
+    print('Bots detected: {}'.format(bots))
 
-  # Exchange ports, and launch the engine.
-  tcpListener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Prepare the socket which will receive the port on which the engine is listening for bots.
-  tcpListener.bind(('localhost', 0))
-  contactPort = tcpListener.getsockname()[1] # Get the port on which the engine will send its port (see above).
-  args = [path.join(getcwd(), 'pythonbot_core'), '-n', '{}'.format(len(botList)), '-c', '{}'.format(contactPort)] # Prepare command to execute to start the engine.
-  print('Lauching {}'.format(' '.join(args)))
-  Popen(args) # Start the engine !
-  
-  # Receive the port to which bots will talk.
-  tcpListener.listen(1) # Only one client will connect (the engine), no need for queueing.
-  contactSocket = tcpListener.accept()[0] # Accept the connection.
-  botPort = int(contactSocket.recv(6).decode()) # Receive the port.
-  contactSocket.close()
-  print('Received port for bots : {}'.format(botPort))
-  
-  # Launch the bots.
-  threads = []
-  for i in range(0, len(botList)):
-    thread = threading.Thread(None, load_bot, 'pythonbot_bot_{}'.format(i), (botModuleList[i], botPort, botList[i]))
-    thread.start()
-    threads.append(thread)  
+    # Import the bots and check that they compile.
+    bot_modules = []
+    # Create a __init__.py file in the Bots/ directory (to get import_module() function working).
+    open(os.path.join('Bots', '__init__.py'), 'w').close()
+    for bot in list(bots):  # Iterate over a copy to be able to remove elements during the iteration process.
+        try:
+            bot_module = importlib.import_module('Bots.' + bot)  # Import the bot python file.
+        except Exception as exception:
+            print('Error: Problem with bot {}: {}'.format(bot, exception))
+            bots.remove(bot)
+        else:
+            bot_modules.append(bot_module)
 
-  # Wait for the bots to finish.
-  for thread in threads:
-    thread.join()
-  print('All threads joined')
+    # Exchange ports, and launch the engine.
+    # Prepare the socket which will receive the port on which the engine is listening for bots.
+    tcp_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tcp_listener.bind(('localhost', 0))
+    contact_port = tcp_listener.getsockname()[1]  # Get the port on which the engine will send its port (see above).
+    # Prepare command to execute to start the engine.
+    args = [os.path.join(os.getcwd(), 'pythonbot_core'), '-n', '{}'.format(len(bots)), '-c', '{}'.format(contact_port)]
+    print('Lauching {}'.format(' '.join(args)))
+    subprocess.Popen(args)  # Start the engine!
+
+    # Receive the port to which bots will talk.
+    tcp_listener.listen(1)  # Only one client will connect (the engine), no need for queueing.
+    contact_socket = tcp_listener.accept()[0]  # Accept the connection.
+    bot_port = int(contact_socket.recv(6).decode())  # Receive the port.
+    contact_socket.close()
+    print('Received port for bots: {}'.format(bot_port))
+
+    # Launch the bots.
+    threads = []
+    for i in range(0, len(bots)):
+        thread = threading.Thread(None, load_bot, 'pythonbot_bot_{}'.format(i), (bot_modules[i], bot_port, bots[i]))
+        thread.start()
+        threads.append(thread)
+
+    # Wait for the bots to finish.
+    for thread in threads:
+        thread.join()
+    print('All threads joined')
+
 
 # Return a free port on localhost. Note that another process could bind a socket to that port after it is closed.
 def get_free_port():
-  tcpSocket = socket.socket()
-  tcpSocket.bind(('localhost', 0))
-  port = tcpSocket.getsockname()[1]
-  tcpSocket.close()
-  return port
+    tcp_socket = socket.socket()
+    tcp_socket.bind(('localhost', 0))
+    port = tcp_socket.getsockname()[1]
+    tcp_socket.close()
+    return port
+
 
 # Load a bot from the python file in 'botName' and launch it.
-def load_bot(botModule, port, botName):
-  nameMaxLength = 10
-  if len(botName) > nameMaxLength: # Cut the name if too long.
-    Bot.safe_print('Warning : Bot name too long ({}) truncated to {}'.format(botName, botName[:nameMaxLength]))
-    botName = botName[:nameMaxLength]
-  bot = Bot.Bot(port, botName) # Create the bot.
-  try:
-    botModule.main(bot) # Run the bot !
-  except socket.error as exception: # The exception is raised when the socket is closed on server's side.
-    Bot.safe_print('Bot {} shut down'.format(botName))
-    del bot
-  except Exception as exception: # Unexpected error (usually function main missing).
-    Bot.safe_print('Error : Problem with bot {} : {}'.format(botName, exception))
-    del bot
+def load_bot(bot_module, port, bot_name):
+    name_max_length = 10
+    if len(bot_name) > name_max_length:  # Cut the name if too long.
+        Bot.safe_print('Warning: Bot name too long ({}) truncated to {}'.format(bot_name, bot_name[:name_max_length]))
+        bot_name = bot_name[:name_max_length]
+    bot = Bot.Bot(port, bot_name)  # Create the bot.
+    try:
+        bot_module.main(bot)  # Run the bot!
+    except socket.error:  # The exception is raised when the socket is closed on server's side.
+        Bot.safe_print('Bot {} shut down'.format(bot_name))
+        del bot
+    except Exception as exception:  # Unexpected error (usually function main missing).
+        Bot.safe_print('Error: Problem with bot {} : {}'.format(bot_name, exception))
+        del bot
+
 
 if __name__ == '__main__':
-  launch_game()
+    launch_game()

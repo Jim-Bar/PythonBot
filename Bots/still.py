@@ -1,3 +1,3 @@
 def main(bot):
-  while True:
-    bot.skip()
+    while True:
+        bot.skip()
