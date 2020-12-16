@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # PythonBot - A game by a developer for developers.
-# Copyright (C) 2015 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
+# Copyright (C) 2015-2021 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -115,7 +115,7 @@ I am no longer releasing updates as I consider that the game reached a really go
 ## License
 
 *PythonBot - A game by a developer for developers.*
-*Copyright (C) 2015 Jean-Marie BARAN*
+*Copyright (C) 2015-2021 Jean-Marie BARAN*
 
 *This program is free software: you can redistribute it and/or modify*
 *it under the terms of the GNU General Public License as published by*
