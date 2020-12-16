@@ -1,6 +1,6 @@
 /*
  * PythonBot - A game by a developer for developers.
- * Copyright (C) 2015 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
+ * Copyright (C) 2015-2021 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <ctime>
 #include <cmath>
 #include <algorithm>
@@ -32,7 +33,7 @@ bool compare_bots(Object const *bot1, Object const *bot2)
   return ((Bot const*) bot1)->get_name() < ((Bot const*) bot2)->get_name();
 }
 
-Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsigned int height) : m_width(width), m_height(height)
+Model::Model(unsigned int numBots, unsigned int botPort, unsigned int contactPort, unsigned int width, unsigned int height) : m_width(width), m_height(height)
 {
   // Initialize seed for random numbers.
   srand(time(0));
@@ -48,24 +49,62 @@ Model::Model(unsigned int port, unsigned int numBots, unsigned int width, unsign
     m_circles.push_back(new Circle(x, y, radius));
   }
   
-  // Initialize listener for the incoming connections.
-  if (m_tcpListener.listen(port) != sf::Socket::Done)
-    std::cerr << "Error : Unable to bind the listener to port " << port << std::endl;
+  // Initialize a listener for the incoming connections.
+  sf::TcpListener tcpListener;
+  if (tcpListener.listen(botPort > 0 ? botPort : (unsigned int) sf::Socket::AnyPort) != sf::Socket::Done)
+    std::cerr << "Error : Unable to bind the listener to port " << botPort << std::endl;
+  
+  // Send the bot socket port to the peer...
+  if (contactPort > 0) // ...if a port for this has been provided.
+  {
+    sf::TcpSocket contactSocket;
+    sf::Socket::Status connectionStatus;
+    unsigned int attemptsLeft(10);
+    do
+    {
+      connectionStatus = contactSocket.connect(sf::IpAddress::LocalHost, contactPort); // Connect to the port provided.
+      if (connectionStatus != sf::Socket::Done) // If the connection fails, the peer is probably not ready yet.
+	sf::sleep(sf::milliseconds(10)); // Wait a little before retrying.
+      attemptsLeft--;
+    } while (connectionStatus != sf::Socket::Done && attemptsLeft > 0);
+    
+    if (connectionStatus == sf::Socket::Done)
+    {
+      char data[6] = {0}; // Size is 6 because the maximum value is 65535 (5 digits plus '\0').
+      int numCharacters(sprintf(data, "%u", tcpListener.getLocalPort())); // Do not use 'botPort' here as if it is zero (and it should be the case), a random port has been chosen.
+
+      // Send the port the server will listen on.
+      if (numCharacters > 0)
+      {
+	if (contactSocket.send(data, numCharacters) != sf::Socket::Done)
+	  std::cerr << "Error : Sending bot socket port to the peer failed" << std::endl;
+      }
+      else
+	std::cerr << "Error : Unable to write the bot socket port to a buffer" << std::endl;
+      
+      contactSocket.disconnect();
+    }
+    else
+      std::cerr << "Error : Could not connect to the peer to the specified port (" << contactPort << ")" << std::endl;
+  }
   
   // Add bots entities.
   std::cout << "Waiting for " << numBots << " bots..." << std::endl;
   for (unsigned int i(0); i < numBots; i++)
-    add_bot();
+    add_bot(tcpListener);
   
   // Sort the bots by name and give them their proper color.
-  std::sort(m_bots.begin(), m_bots.end(), compare_bots);
+  std::sort(m_aliveBots.begin(), m_aliveBots.end(), compare_bots);
   sf::Color colors[] = {sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow,
                         sf::Color::Magenta, sf::Color::Cyan, sf::Color(255, 128, 0), sf::Color(128, 0, 255)}; // ... Orange, Purple.
   for (unsigned int i(0); i < numBots; i++)
-    ((Bot*) m_bots[i])->set_color(colors[i % 8]);
+    ((Bot*) m_aliveBots[i])->set_color(colors[i % 8]);
   
   // Close the listener (not needed anymore).
-  m_tcpListener.close();
+  tcpListener.close();
+  
+  // Finally, fill the vector of all bots.
+  m_bots = m_aliveBots;
 }
 
 Model::~Model()
@@ -78,10 +117,10 @@ Model::~Model()
   }
   
   // Free bots.
-  while (!m_bots.empty())
+  while (!m_aliveBots.empty())
   {
-    delete m_bots.back();
-    m_bots.pop_back();
+    delete m_aliveBots.back();
+    m_aliveBots.pop_back();
   }
   while (!m_deadBots.empty())
   {
@@ -116,9 +155,9 @@ Model::get_circles() const
 }
 
 std::vector<Object*> const&
-Model::get_bots() const
+Model::get_alive_bots() const
 {
-  return m_bots;
+  return m_aliveBots;
 }
 
 std::vector<Object*> const&
@@ -139,6 +178,12 @@ Model::get_bullets() const
   return m_bullets;
 }
 
+std::vector<Object*> const&
+Model::get_bots() const
+{
+  return m_bots;
+}
+
 bool
 Model::collides(Bot const *bot, Bot **botCollision, sf::Vector2f& hitPoint) const
 {
@@ -154,11 +199,11 @@ Model::collides(Bot const *bot, Bot **botCollision, sf::Vector2f& hitPoint) cons
   
   // Loop over all the bots.
   *botCollision = 0;
-  for (unsigned int i(0); i < m_bots.size(); i++)
-    if (bot != m_bots[i] && bot->distance(m_bots[i]) <= 4.0f / 3.0f * Bot::botLength)
-      if (collides(bot, ((Bot*) m_bots[i]), hitPoint))
+  for (unsigned int i(0); i < m_aliveBots.size(); i++)
+    if (bot != m_aliveBots[i] && bot->distance(m_aliveBots[i]) <= 4.0f / 3.0f * Bot::botLength)
+      if (collides(bot, ((Bot*) m_aliveBots[i]), hitPoint))
       {
-	*botCollision = (Bot*) m_bots[i];
+	*botCollision = (Bot*) m_aliveBots[i];
         return true;
       }
   
@@ -184,11 +229,11 @@ bool
 Model::collides(Bullet const *bullet, Bot **bot, sf::Vector2f& hitPoint) const
 {
   // Loop over all the bots.
-  for (unsigned int i(0); i < m_bots.size(); i++)
-    if (distance(bullet->get_position(), m_bots[i]->get_position()) <= bullet->get_radius() + 2.0f / 3.0f * Bot::botLength)
-      if (collides((Bot*) m_bots[i], bullet, hitPoint))
+  for (unsigned int i(0); i < m_aliveBots.size(); i++)
+    if (distance(bullet->get_position(), m_aliveBots[i]->get_position()) <= bullet->get_radius() + 2.0f / 3.0f * Bot::botLength)
+      if (collides((Bot*) m_aliveBots[i], bullet, hitPoint))
       {
-        *bot = (Bot*) m_bots[i];
+        *bot = (Bot*) m_aliveBots[i];
         return true;
       }
 
@@ -216,9 +261,9 @@ Model::inflict_damages(Bot *bot)
   if (!bot->is_alive()) // Move the bot to the dead list if it is dead.
   {
     m_deadBots.push_back(bot);
-    for (unsigned int i(0); i < m_bots.size(); i++)
-      if (bot == m_bots[i])
-        m_bots.erase(m_bots.begin() + i);
+    for (unsigned int i(0); i < m_aliveBots.size(); i++)
+      if (bot == m_aliveBots[i])
+        m_aliveBots.erase(m_aliveBots.begin() + i);
     for (unsigned int i(0); i < m_scans.size(); i++) // Remove the scan from the list.
       if (&bot->get_scan() == m_scans[i])
         m_scans.erase(m_scans.begin() + i);
@@ -247,8 +292,8 @@ Model::scan(Bot *bot, bool scanCircles, unsigned int& numCircles, bool scanBots,
   
   // Scan bots.
   if (scanBots)
-    for (unsigned int i(0); i < m_bots.size(); i++)
-      if (bot != m_bots[i] && collides((Bot const*) m_bots[i], &bot->get_scan(), hitPoint))
+    for (unsigned int i(0); i < m_aliveBots.size(); i++)
+      if (bot != m_aliveBots[i] && collides((Bot const*) m_aliveBots[i], &bot->get_scan(), hitPoint))
         numBots++;
   
   // Scan bullets.
@@ -272,17 +317,17 @@ Model::distance(sf::Vector2f const& p1, sf::Vector2f const& p2) const
 }
 
 void
-Model::add_bot()
+Model::add_bot(sf::TcpListener& tcpListener)
 {
   sf::Vector2f hitPoint;
-  Bot *bot(new Bot(m_tcpListener)), *botBuffer(0); // 'botBuffer' not used, just to be able to call collides().
+  Bot *bot(new Bot(tcpListener)), *botBuffer(0); // 'botBuffer' not used, just to be able to call collides().
   do // Choose a free random position and orientation.
   {
     bot->set_position((float) random_value(m_width), (float) random_value(m_height));
     bot->rotate(random_value(360));
   } while (collides(bot, &botBuffer, hitPoint));  
   
-  m_bots.push_back(bot);
+  m_aliveBots.push_back(bot);
 }
 
 bool

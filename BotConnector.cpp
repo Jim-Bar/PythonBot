@@ -1,6 +1,6 @@
 /*
  * PythonBot - A game by a developer for developers.
- * Copyright (C) 2015 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
+ * Copyright (C) 2015-2021 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,6 +123,14 @@ BotConnector::answer_scan_request(unsigned int health, unsigned int numBulletsLe
 void
 BotConnector::send_data(unsigned int numCharacters)
 {
+  /*
+   * Partial sends occur on asynchronous mode. In case of partial sent, we are expected to send the part of the message which has not been sent.
+   * But here we assume that partial sends will never occur because:
+   * - The messages are very small
+   * - The connection is on local host.
+   * So the goal here is just to discard the warning message from SFML when using 'send()' without third argument in asynchronous mode.
+   */
+  
   // Partial sends warning have been introduced in SFML 2.3. Up to 2.2, no need for using a third parameter for 'send()'.
   #if SFML_VERSION_MAJOR == 2 && SFML_VERSION_MINOR <= 2
   

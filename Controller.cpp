@@ -1,6 +1,6 @@
 /*
  * PythonBot - A game by a developer for developers.
- * Copyright (C) 2015 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
+ * Copyright (C) 2015-2021 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,36 +20,33 @@
 
 #include "Controller.h"
 
-Controller::Controller(Model& model, View& view) : m_model(model), m_view(view)
+Controller::Controller(Model& model, View& view, bool startPaused) : m_startPaused(startPaused), m_model(model), m_view(view)
 {}
 
 void
 Controller::loop()
 {
-  bool gameFinished(false), paused(true);
-  sf::Event event;
+  bool gameFinished(false), paused(m_startPaused);
   
-  m_view.resize(); // Useful on Windows where the content is not properly sized. A recalculation fix it.
   while (!gameFinished)
   {
     // Deal with all events.
-    while (m_view.get_window().pollEvent(event))
+    switch (m_view.read_events())
     {
-      if (event.type == sf::Event::Closed)
-      {
-	m_view.get_window().close();
+      case View::REQUEST_QUIT: // Request to quit the game.
 	gameFinished = true;
-      }
-      else if (event.type == sf::Event::Resized)
-	m_view.resize();
-      else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+	break;
+      case View::REQUEST_PAUSE: // Request to pause/unpause the game.
 	paused = !paused;
+	break;
+      default: // No request made.
+	break;
     }
     
     // Draw the scene.
     m_view.draw(m_model.get_circles());
     m_view.draw(m_model.get_dead_bots());
-    m_view.draw(m_model.get_bots());
+    m_view.draw(m_model.get_alive_bots());
     m_view.draw(m_model.get_bullets());
     m_view.draw(m_model.get_scans());
     if (paused)
@@ -105,10 +102,10 @@ Controller::update_bots()
   // Loop over all the bots.
   Bot *bot(0);
   sf::Vector2f hitPoint;
-  for (int i(0); i < (int) m_model.get_bots().size(); i++) // See bot death below for the cast.
+  for (int i(0); i < (int) m_model.get_alive_bots().size(); i++) // See bot death below for the cast.
   {
     // Get a direct pointer for convenience.
-    bot = (Bot*) m_model.get_bots()[i];    
+    bot = (Bot*) m_model.get_alive_bots()[i];
     
     // Get and manage the request of each bot.
     BotConnector::Request const& request(bot->get_connector().get_request());

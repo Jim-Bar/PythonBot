@@ -18,26 +18,22 @@
  * Refer to 'LICENSE.txt' for the full notice.
  */
 
-#ifndef CIRCLE__HEADER
-#define CIRCLE__HEADER
+#ifndef GAME__HEADER
+#define GAME__HEADER
 
-#include <SFML/Graphics.hpp>
-#
-#include "Object.h"
+#include "Parser.h"
 
-class Circle : public Object
+class Game
 {
 public:
   /* Constructor. */
-  Circle(unsigned int x, unsigned int y, unsigned int radius, sf::Color color = sf::Color(128, 128, 128));
-  
-  /* Getters. */
-  float get_radius() const;
-  sf::Vector2f const& get_position() const;
-  sf::Shape const& get_SFML_shape() const;
+  Game(int argc, char *argv[]);
 
-protected:
-  sf::CircleShape m_SFMLShape;
+  /* Start the game. Return 'true' when the game terminates successfully, 'false' otherwise. */
+  bool start() const;
+
+private:
+  Parser m_parser;
 };
 
 #endif

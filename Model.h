@@ -1,6 +1,6 @@
 /*
  * PythonBot - A game by a developer for developers.
- * Copyright (C) 2015 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
+ * Copyright (C) 2015-2021 Jean-Marie BARAN (jeanmarie.baran@gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,17 +30,18 @@ class Model
 {
 public:
   /* Constructor. */
-  Model(unsigned int port, unsigned int numBots, unsigned int width = 800, unsigned int height = 600); // This is not the resolution, but the arena dimensions.
+  Model(unsigned int numBots, unsigned int botPort = 0, unsigned int contactPort = 0, unsigned int width = 800, unsigned int height = 600); // This is not the resolution, but the arena dimensions.
   ~Model();
   
   /* Getters. */
   unsigned int get_width() const;
   unsigned int get_height() const;
   std::vector<Object*> const& get_circles() const;
-  std::vector<Object*> const& get_bots() const;
+  std::vector<Object*> const& get_alive_bots() const;
   std::vector<Object*> const& get_dead_bots() const;
   std::vector<Object*> const& get_scans() const;
   std::vector<Object*> const& get_bullets() const;
+  std::vector<Object*> const& get_bots() const;
   
   /* Return 'true' if a bot collides with another object, bullets excepted ('bot' is the bot of collision is any). */
   bool collides(Bot const *bot, Bot **botCollision, sf::Vector2f& hitPoint) const;
@@ -71,15 +72,14 @@ private:
   unsigned int const m_height;
   
   std::vector<Object*> m_circles;
-  std::vector<Object*> m_bots;
+  std::vector<Object*> m_aliveBots;
   std::vector<Object*> m_deadBots;
   std::vector<Object*> m_scans;
   std::vector<Object*> m_bullets;
-  
-  sf::TcpListener m_tcpListener;
+  std::vector<Object*> m_bots; // All bots (alive + dead). Just to keep a way to have the bots ordered even when some die.
   
   /* Add a bot to the game. */
-  void add_bot();
+  void add_bot(sf::TcpListener& tcpListener);
   
   /* Check that a bot is within the world. */
   bool is_in_world(Bot const *bot, sf::Vector2f& hitPoint) const;

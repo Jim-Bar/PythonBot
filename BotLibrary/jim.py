@@ -1,27 +1,29 @@
 def main(bot):
-  while True:
-    rotate(bot)
-    move(bot)
+    while True:
+        rotate(bot)
+        move(bot)
+
 
 def rotate(bot):
-  for i in range(0, 150):
-    bot.rotate(11)
-    for i in range(0, 10):
-      botCount = 1
-      obstacleCount = 0
-      while botCount > 0:
-        scanResult = bot.scan(10 + i * 30, 10, True, True, False)
-        obstacleCount = scanResult[0]
-        botCount = scanResult[1]
-        if botCount > 0:
-          bot.fire()
-      if obstacleCount > 0:
-        break
+    for i in range(0, 150):
+        bot.rotate(11)
+        for j in range(0, 10):
+            bot_count = 1
+            obstacle_count = 0
+            while bot_count > 0:
+                scan_result = bot.scan(10 + j * 30, 10, True, True, False)
+                obstacle_count = scan_result[0]
+                bot_count = scan_result[1]
+                if bot_count > 0:
+                    bot.fire()
+            if obstacle_count > 0:
+                break
+
 
 def move(bot):
-  for i in range(0, 150):
-    scanResult = bot.scan(20, 12, True, True, False)
-    if scanResult[0] > 0 or scanResult[1] > 0:
-      bot.rotate(15)
-    else:
-      bot.move()
+    for i in range(0, 150):
+        scan_result = bot.scan(20, 12, True, True, False)
+        if scan_result[0] > 0 or scan_result[1] > 0:
+            bot.rotate(15)
+        else:
+            bot.move()
