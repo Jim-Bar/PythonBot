@@ -20,47 +20,44 @@
 
 /*
  * Standalone or online version.
- * 
- * 'LocalView' is the regular version, in standalone mode. It will open a window on the system, and draw the game.
- * 'RemoteView' is the online version. It will open a socket to a client, and send the graphical data to be drawn.
  *
- * If an extra port number is given, the online version will start. Otherwise the standalone version will be used.
+ * 'LocalView' is the regular version, in standalone mode. It will open a window
+ * on the system, and draw the game. 'RemoteView' is the online version. It will
+ * open a socket to a client, and send the graphical data to be drawn.
+ *
+ * If an extra port number is given, the online version will start. Otherwise
+ * the standalone version will be used.
  */
 
-#include "Model.h"      // M
-#include "LocalView.h"  // V
-#include "RemoteView.h" // V
 #include "Controller.h" // C
+#include "LocalView.h"  // V
+#include "Model.h"      // M
+#include "RemoteView.h" // V
 #
 #include "Game.h"
 
-Game::Game(int argc, char *argv[]) : m_parser(argc, argv)
-{}
+Game::Game(int argc, char *argv[]) : m_parser(argc, argv) {}
 
-bool
-Game::start() const
-{
-  if (m_parser.parsing_succeeded())
-  {
-    if (m_parser.is_server()) // Local view.
-    {
-      Model model(m_parser.get_num_bots(), m_parser.get_bot_socket_port(), m_parser.get_contact_socket_port());
-      RemoteView view(model, m_parser.get_remote_socket_port(), m_parser.get_contact_socket_port());
+bool Game::start() const {
+  if (m_parser.parsing_succeeded()) {
+    if (m_parser.is_server()) { // Local view.
+      Model model(m_parser.get_num_bots(), m_parser.get_bot_socket_port(),
+                  m_parser.get_contact_socket_port());
+      RemoteView view(model, m_parser.get_remote_socket_port(),
+                      m_parser.get_contact_socket_port());
       Controller controller(model, view, m_parser.start_paused());
-      
+
       controller.loop();
-    }
-    else // Remote view.
-    {
-      Model model(m_parser.get_num_bots(), m_parser.get_bot_socket_port(), m_parser.get_contact_socket_port());
+    } else { // Remote view.
+      Model model(m_parser.get_num_bots(), m_parser.get_bot_socket_port(),
+                  m_parser.get_contact_socket_port());
       LocalView view(model);
       Controller controller(model, view, m_parser.start_paused());
-      
+
       controller.loop();
     }
-    
+
     return true;
-  }
-  else
+  } else
     return false;
 }

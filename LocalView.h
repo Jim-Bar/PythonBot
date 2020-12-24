@@ -23,53 +23,55 @@
 
 #include "View.h"
 
-class LocalView : public View
-{
+class LocalView : public View {
 public:
   /* Constructor. */
-  LocalView(Model const& model, sf::Color edgesColor = sf::Color(128, 128, 128));
-  
+  LocalView(Model const &model,
+            sf::Color edgesColor = sf::Color(128, 128, 128));
+
   /* Deal with events. */
   EventRequest read_events();
-  
+
   /* Set a list of objects to be drawn. */
-  void draw(std::vector<Object*> const& objects);
-  
+  void draw(std::vector<Object *> const &objects);
+
   /* Display the scene. */
   void render();
-  
+
   /* Add a little explosion to the scene. */
-  void add_explosion(sf::Vector2f const& position, float radius);
-  
+  void add_explosion(sf::Vector2f const &position, float radius);
+
   /* Add a bot explosion to the scene. */
-  void add_bot_explosion(sf::Vector2f const& position, float radius);
-  
+  void add_bot_explosion(sf::Vector2f const &position, float radius);
+
   /* Draw "Pause" on top of the game. */
   void draw_pause();
 
 private:
   static float const edgesWidth = 10.0f;
-  static float const defaultMargin = 50.0f; // Default margin between the arena and the pannel.
-  
-  Model const& m_model; // To have access to 'get_bots()' in order to print their state.
-  
+  // Default margin between the arena and the panel.
+  static float const defaultMargin = 50.0f;
+
+  // To have access to 'get_bots()' in order to print their state.
+  Model const &m_model;
+
   sf::RenderWindow m_window;
   sf::View m_arena;
-  sf::View m_pannel;
+  sf::View m_panel;
   sf::RectangleShape m_edges[4]; // World's boundaries.
-  std::vector<sf::CircleShape*> m_explosions;
+  std::vector<sf::CircleShape *> m_explosions;
   sf::Font m_font; // Used for bots' names.
   sf::Text m_botName;
   sf::Text m_numKills; // Number of kills for the bot.
   sf::Text m_pause;
-  
+
   /* Re-compute the positions and sizes of the views. */
   void resize();
-  
+
   /* Draw world's edges and explosions. */
   void draw_edges();
   void draw_explosions();
-  
+
   /* Display bot's information. */
   void draw_bots_info();
 };

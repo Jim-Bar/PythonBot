@@ -23,13 +23,13 @@
 
 #include "Parser.h"
 
-class Game
-{
+class Game {
 public:
   /* Constructor. */
   Game(int argc, char *argv[]);
 
-  /* Start the game. Return 'true' when the game terminates successfully, 'false' otherwise. */
+  /* Start the game. Return 'true' when the game terminates successfully,
+   * 'false' otherwise. */
   bool start() const;
 
 private:

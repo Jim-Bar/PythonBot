@@ -23,18 +23,17 @@
 
 #include "Circle.h"
 
-class Scan : public Circle
-{
+class Scan : public Circle {
 public:
   /* Constructor. */
   Scan(sf::Color color);
-  
+
   /* Getters. */
   bool get_active() const;
-  
+
   /* Setters. */
   void set_color(sf::Color color);
-  void set_position(sf::Vector2f const& position);
+  void set_position(sf::Vector2f const &position);
   void set_radius(unsigned int radius);
   void set_active();
 

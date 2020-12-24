@@ -24,24 +24,23 @@
 #include "Model.h"
 #include "View.h"
 
-class Controller
-{
+class Controller {
 public:
   /* Constructor. */
-  Controller(Model& model, View& view, bool startPaused = true);
-  
+  Controller(Model &model, View &view, bool startPaused = true);
+
   /* Game loop. */
   void loop();
 
 private:
   bool m_startPaused;
-  
-  Model& m_model;
-  View& m_view;
+
+  Model &m_model;
+  View &m_view;
 
   /* Manage bullets' movements, collisions... */
   void update_bullets();
-  
+
   /* Communicate with the bots, move them... */
   void update_bots();
 };

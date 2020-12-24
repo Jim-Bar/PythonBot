@@ -23,14 +23,14 @@
 
 #include <SFML/Graphics.hpp>
 
-class Object
-{
+class Object {
 public:
   virtual ~Object();
-  virtual sf::Vector2f const& get_position() const = 0;
-  virtual sf::Shape const& get_SFML_shape() const = 0;
-  
-  /* Return the euclidean distance to another object (from centroid to centroid). */
+  virtual sf::Vector2f const &get_position() const = 0;
+  virtual sf::Shape const &get_SFML_shape() const = 0;
+
+  /* Return the euclidean distance to another object (from centroid to
+   * centroid). */
   float distance(Object *object) const;
 };
 

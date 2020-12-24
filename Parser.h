@@ -23,14 +23,15 @@
 
 #include <string>
 
-class Parser
-{
+class Parser {
 public:
   /* Constructor. */
   Parser(int argc, char *argv[]);
 
   /* Getters. */
-  bool parsing_succeeded() const; // Return 'true' if the parsing succeeded. This value MUST be checked before doing anything else.
+  /* Return 'true' if the parsing succeeded. This value MUST be checked before
+   * doing anything else. */
+  bool parsing_succeeded() const;
   bool is_server() const;
   bool start_paused() const;
   unsigned int get_num_bots() const;
@@ -41,18 +42,20 @@ public:
 private:
   char **m_begin;
   char **m_end;
-  
+
   bool m_parsingSucceeded;
-  bool m_isServer; // 'true' means the game use the remote view instead of the local view.
-  bool m_startPaused; // 'true' means the game should be paused on the beginning.
+  // 'true' means the game use the remote view instead of the local view.
+  bool m_isServer;
+  // 'true' means the game should be paused on the beginning.
+  bool m_startPaused;
   unsigned int m_numBots;
   unsigned int m_botSocketPort;
   unsigned int m_remoteSocketPort;
   unsigned int m_contactSocketPort;
-  
-  bool has_command_option(std::string const& option);
-  char* get_command_option(std::string const& option);
-  
+
+  bool has_command_option(std::string const &option);
+  char *get_command_option(std::string const &option);
+
   void print_usage_with_warning(char const *warning);
   void print_usage_with_error(char const *error);
   void print_usage_with_level(char const *level, char const *message);

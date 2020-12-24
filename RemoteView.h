@@ -23,43 +23,45 @@
 
 #include "View.h"
 
-class RemoteView : public View
-{
+class RemoteView : public View {
 public:
   /* Constructor. */
-  RemoteView(Model const& model, unsigned int remotePort = 0, unsigned int contactPort = 0);
-  
+  RemoteView(Model const &model, unsigned int remotePort = 0,
+             unsigned int contactPort = 0);
+
   /* Deal with events. */
   EventRequest read_events();
-  
+
   /* Set a list of objects to be drawn. */
-  void draw(std::vector<Object*> const& objects);
-  
+  void draw(std::vector<Object *> const &objects);
+
   /* Display the scene. */
   void render();
-  
+
   /* Add a little explosion to the scene. */
-  void add_explosion(sf::Vector2f const& position, float radius);
-  
+  void add_explosion(sf::Vector2f const &position, float radius);
+
   /* Add a bot explosion to the scene. */
-  void add_bot_explosion(sf::Vector2f const& position, float radius);
-  
+  void add_bot_explosion(sf::Vector2f const &position, float radius);
+
   /* Draw "Pause" on top of the game. */
   void draw_pause();
 
 private:
-  Model const& m_model;
+  Model const &m_model;
   bool m_clientDisconnected;
   sf::TcpSocket m_tcpClient;
-  
+
   // View's custom knowledge of starting explosions.
   std::vector<sf::Vector2f> m_explosions;
   std::vector<sf::Vector2f> m_botExplosions;
-  
-  /* Send the initial data (positions and sizes of objects). Refer to the method definition for the frame format. Success : true, fail : false. */
+
+  /* Send the initial data (positions and sizes of objects). Refer to the method
+   * definition for the frame format. Success : true, fail : false. */
   bool send_initial_state();
-  
-  /* Send the current state : position of bots and bullets, and explosions. Refer to the method definition for the frame format. */
+
+  /* Send the current state : position of bots and bullets, and explosions.
+   * Refer to the method definition for the frame format. */
   void send_current_state();
 };
 

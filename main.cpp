@@ -23,12 +23,11 @@
 #
 #include "Game.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   Game game(argc, argv);
-  
+
   if (!game.start())
     return EXIT_FAILURE;
-  
+
   return EXIT_SUCCESS;
 }
