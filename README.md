@@ -1,4 +1,4 @@
-# What is PythonBot ?
+# What is PythonBot?
 
 PythonBot is a game where you write an AI (in Python) which will fight in an arena for its survival.
 
@@ -61,7 +61,7 @@ By default, 5 bots are participating into the fight, and you will see that they 
 located in the subdirectory `Bots/`. You can find other examples in the `BotLibrary/` folder. To use a bot, just copy it
 to the `Bots/` folder.
 
-# Write your own bot !
+# Write your own bot!
 
 Creating your bot is very simple. What you need is to create a python file named after the name of your bot (for example
 `myBot.py`). Inside this file, create a function `main` that takes one argument `bot`:
