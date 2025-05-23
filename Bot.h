@@ -28,7 +28,7 @@
 
 class Bot : public Object {
 public:
-  static float const botLength = 20.0f;
+  static float constexpr botLength = 20.0f;
   static float const botWidth;
 
   /* Constructor. */
@@ -75,7 +75,7 @@ public:
   void receive_damages();
 
 private:
-  static float const botSpeed = 3.0f;
+  static float constexpr botSpeed = 3.0f;
 
   sf::Vector2f m_v1;
   sf::Vector2f m_v2;

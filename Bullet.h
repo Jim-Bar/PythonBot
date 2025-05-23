@@ -37,7 +37,7 @@ public:
   void move();
 
 private:
-  static float const bulletSpeed = 9.0f;
+  static float constexpr bulletSpeed = 9.0f;
 
   sf::Vector2f m_direction; // Directional vector (normalized).
   Bot *m_botOrigin;         // The bot which fired the bullet.

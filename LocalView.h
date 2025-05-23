@@ -48,9 +48,9 @@ public:
   void draw_pause();
 
 private:
-  static float const edgesWidth = 10.0f;
+  static float constexpr edgesWidth = 10.0f;
   // Default margin between the arena and the panel.
-  static float const defaultMargin = 50.0f;
+  static float constexpr defaultMargin = 50.0f;
 
   // To have access to 'get_bots()' in order to print their state.
   Model const &m_model;
