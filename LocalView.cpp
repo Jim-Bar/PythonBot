@@ -98,7 +98,7 @@ LocalView::LocalView(Model const &model, sf::Color edgesColor)
     m_numKills.setStyle(sf::Text::Bold);
     m_pause.setStyle(sf::Text::Bold);
 
-    m_pause.setColor(sf::Color::Red);
+    m_pause.setFillColor(sf::Color::Red);
     m_pause.setString("Pause");
     m_pause.setPosition(
         m_arena.getCenter().x - m_pause.getLocalBounds().width / 2.0f,
@@ -256,7 +256,7 @@ void LocalView::draw_bots_info() {
 
     // Draw name.
     m_botName.setString(bot->get_name());
-    m_botName.setColor(box.getOutlineColor());
+    m_botName.setFillColor(box.getOutlineColor());
     m_botName.setPosition(box.getPosition() + sf::Vector2f(5.0f, 2.0f));
     m_window.draw(m_botName);
 
@@ -267,7 +267,7 @@ void LocalView::draw_bots_info() {
     /* Increase the size of the number of kills if it is high (can break the
      * design if it is too high). */
     m_numKills.setCharacterSize(15 + bot->get_num_kills() / 2.0f);
-    m_numKills.setColor(box.getOutlineColor());
+    m_numKills.setFillColor(box.getOutlineColor());
     m_numKills.setPosition(sf::Vector2f(box.getPosition().x + box.getSize().x -
                                             m_numKills.getLocalBounds().width -
                                             5.0f,
