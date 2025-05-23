@@ -2,6 +2,8 @@
 
 PythonBot is a game where you write an AI (in Python) which will fight in an arena for its survival.
 
+![GIF of bots fighting in an arena](https://drive.google.com/uc?export=view&id=1XHq4G4UvGTj3GnZ64Ggd7yJON8GYMNuF)
+
 Each bot in the arena has its own AI, written by a player. The bot can move around, scan its environment, and shoot
 bullets at others. The game ends when there is only one survivor (or when the game master decide to stop it, as it can
 be very long), but you can also attribute victory on other critters (like the number of kills among the survivors).
